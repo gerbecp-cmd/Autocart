@@ -1,0 +1,4 @@
+import assert from 'node:assert/strict';import {offlinePlan,handleCommand,parsePrefs} from '../src/index.js';
+let p=offlinePlan('Load chicken parmesan recipe to Walmart for 4 people under $40');assert.equal(p.retailer,'walmart');assert.equal(p.servings,4);assert.equal(p.budget,40);assert(p.items.some(i=>i.searchTerm==='fresh garlic bulb'));assert(!p.items.some(i=>/cloves/.test(i.searchTerm)));
+p=offlinePlan('Load tacos to Walmart for 6 under $35, no sour cream, skip pantry staples');assert.equal(p.servings,6);assert(!p.items.some(i=>i.name==='sour cream'));
+assert.equal(parsePrefs('Load lasagna to Target for 8').retailer,'target');const noAi=await handleCommand('Load a completely unknown recipe to Walmart',{});assert.equal(noAi.ok,false);assert.equal(noAi.needsAI,true);console.log('Worker smoke tests PASS');

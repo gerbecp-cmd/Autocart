@@ -1,0 +1,15 @@
+android/.gradle/
+android/local.properties
+android/**/build/
+worker/node_modules/
+worker/.wrangler/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+.env
+.env.*
+*.jks
+*.keystore
+*.apk
+*.aab

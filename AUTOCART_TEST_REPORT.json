@@ -1,0 +1,18 @@
+{
+  "version":"3.1.0",
+  "status":"CORE_TESTS_PASS",
+  "shared_client":"web folder is used by PC PWA and Android assets",
+  "tests":{
+    "core_recipe_command":"pass",
+    "walmart_clean_search_terms":"pass",
+    "retailer_handoff_generation":"pass",
+    "exclusion_parsing":"pass",
+    "skip_pantry":"pass",
+    "unknown_recipe_requires_ai":"pass",
+    "worker_fallback":"pass",
+    "worker_syntax":"pass",
+    "pc_javascript_syntax":"pass",
+    "pc_real_browser_navigation":"blocked_by_execution_environment_policy",
+    "android_native_compile":"pending_github_actions"
+  }
+}

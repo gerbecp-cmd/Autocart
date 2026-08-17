@@ -1,0 +1,26 @@
+name: Worker and PC checks
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['worker/**','web/**','.github/workflows/worker-check.yml']
+  pull_request:
+    paths: ['worker/**','web/**','.github/workflows/worker-check.yml']
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: node web/test-core.cjs
+      - run: node --check web/app.js
+      - run: node --check web/sw.js
+      - working-directory: worker
+        run: npm install
+      - working-directory: worker
+        run: npm test
+      - working-directory: worker
+        run: npx wrangler deploy --dry-run

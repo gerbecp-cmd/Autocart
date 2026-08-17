@@ -1,0 +1,4 @@
+const assert=require('assert');const core=require('./autocart-core.js');
+let p=core.buildOfflinePlan('Load chicken parmesan recipe to Walmart for 4 people under $40');assert(p.ok);assert.equal(p.retailer,'walmart');assert.equal(p.servings,4);assert.equal(p.budget,40);assert(p.items.some(i=>i.searchTerm==='fresh garlic bulb'));assert(!p.items.some(i=>/cloves/.test(i.searchTerm)));let q=core.makeQueue(p);assert(q.length===p.items.length);assert(q.every(i=>i.url.startsWith('https://www.walmart.com/search?q=')));
+p=core.buildOfflinePlan('Load tacos to Walmart for 6 under $35, no sour cream, skip pantry staples');assert(p.ok);assert.equal(p.servings,6);assert(!p.items.some(i=>i.name==='sour cream'));
+p=core.buildOfflinePlan('Load something completely unknown to Walmart');assert(!p.ok&&p.needsAI);console.log('AutoCart core tests PASS');
