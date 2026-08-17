@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -20,7 +21,9 @@ import org.json.JSONObject;
 
 public class MainActivity extends Activity {
     private static final int VOICE_REQUEST = 501;
+    private static final int FILE_REQUEST = 502;
     private WebView webView;
+    private ValueCallback<Uri[]> fileCallback;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -30,9 +33,25 @@ public class MainActivity extends Activity {
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setAllowFileAccess(true);
-        s.setAllowContentAccess(false);
+        s.setAllowContentAccess(true);
         s.setMediaPlaybackRequiresUserGesture(true);
-        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> callback, FileChooserParams params) {
+                if (fileCallback != null) fileCallback.onReceiveValue(null);
+                fileCallback = callback;
+                Intent intent;
+                try { intent = params.createIntent(); }
+                catch (Exception e) { intent = new Intent(Intent.ACTION_OPEN_DOCUMENT); intent.setType("*/*"); intent.addCategory(Intent.CATEGORY_OPENABLE); }
+                try {
+                    startActivityForResult(intent, FILE_REQUEST);
+                    return true;
+                } catch (Exception e) {
+                    fileCallback = null;
+                    Toast.makeText(MainActivity.this, "File picker is unavailable", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+            }
+        });
         webView.setWebViewClient(new WebViewClient());
         webView.addJavascriptInterface(new NativeBridge(), "Android");
         if (BuildConfig.DEBUG) WebView.setWebContentsDebuggingEnabled(true);
@@ -42,6 +61,14 @@ public class MainActivity extends Activity {
     @Override @SuppressWarnings("deprecation")
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == FILE_REQUEST) {
+            if (fileCallback != null) {
+                Uri[] result = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
+                fileCallback.onReceiveValue(result);
+                fileCallback = null;
+            }
+            return;
+        }
         if (requestCode == VOICE_REQUEST && resultCode == RESULT_OK && data != null) {
             ArrayList<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             if (results != null && !results.isEmpty()) {
