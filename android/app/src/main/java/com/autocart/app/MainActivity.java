@@ -11,10 +11,13 @@ import android.speech.RecognizerIntent;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.Toast;
+import androidx.webkit.WebViewAssetLoader;
+import androidx.webkit.WebViewClientCompat;
 import java.util.ArrayList;
 import java.util.Locale;
 import org.json.JSONObject;
@@ -29,19 +32,32 @@ public class MainActivity extends Activity {
         super.onCreate(state);
         webView = new WebView(this);
         setContentView(webView);
+
+        final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+            .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
+            .build();
+
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
-        s.setAllowFileAccess(true);
-        s.setAllowContentAccess(true);
+        s.setAllowFileAccess(false);
+        s.setAllowContentAccess(false);
+        s.setAllowFileAccessFromFileURLs(false);
+        s.setAllowUniversalAccessFromFileURLs(false);
         s.setMediaPlaybackRequiresUserGesture(true);
+
         webView.setWebChromeClient(new WebChromeClient() {
             @Override public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> callback, FileChooserParams params) {
                 if (fileCallback != null) fileCallback.onReceiveValue(null);
                 fileCallback = callback;
                 Intent intent;
-                try { intent = params.createIntent(); }
-                catch (Exception e) { intent = new Intent(Intent.ACTION_OPEN_DOCUMENT); intent.setType("*/*"); intent.addCategory(Intent.CATEGORY_OPENABLE); }
+                try {
+                    intent = params.createIntent();
+                } catch (Exception e) {
+                    intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    intent.setType("*/*");
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                }
                 try {
                     startActivityForResult(intent, FILE_REQUEST);
                     return true;
@@ -52,10 +68,21 @@ public class MainActivity extends Activity {
                 }
             }
         });
-        webView.setWebViewClient(new WebViewClient());
+
+        webView.setWebViewClient(new WebViewClientCompat() {
+            @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                return assetLoader.shouldInterceptRequest(request.getUrl());
+            }
+
+            @Override @SuppressWarnings("deprecation")
+            public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+                return assetLoader.shouldInterceptRequest(Uri.parse(url));
+            }
+        });
+
         webView.addJavascriptInterface(new NativeBridge(), "Android");
         if (BuildConfig.DEBUG) WebView.setWebContentsDebuggingEnabled(true);
-        webView.loadUrl("file:///android_asset/index.html");
+        webView.loadUrl("https://appassets.androidplatform.net/assets/index.html");
     }
 
     @Override @SuppressWarnings("deprecation")
@@ -78,18 +105,21 @@ public class MainActivity extends Activity {
         }
     }
 
-    @Override public void onBackPressed() {
+    @Override @SuppressWarnings("deprecation")
+    public void onBackPressed() {
         if (webView != null && webView.canGoBack()) webView.goBack(); else super.onBackPressed();
     }
 
     public class NativeBridge {
         @JavascriptInterface public String getApiUrl() { return BuildConfig.AUTOCART_API_URL; }
+
         @JavascriptInterface public void openExternal(String url) {
             runOnUiThread(() -> {
                 try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))); }
                 catch (Exception e) { Toast.makeText(MainActivity.this, "Could not open retailer", Toast.LENGTH_SHORT).show(); }
             });
         }
+
         @JavascriptInterface public void copyText(String text) {
             runOnUiThread(() -> {
                 ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -97,6 +127,7 @@ public class MainActivity extends Activity {
                 Toast.makeText(MainActivity.this, "Shopping list copied", Toast.LENGTH_SHORT).show();
             });
         }
+
         @JavascriptInterface public void startVoice() {
             runOnUiThread(() -> {
                 Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
