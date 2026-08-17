@@ -2,7 +2,7 @@
 const $=id=>document.getElementById(id);let currentPlan=null,queue=[],queueIndex=0,deferredInstall=null;
 function nativeBridge(){return typeof Android!=='undefined'?Android:null}
 function getConfiguredApi(){const saved=localStorage.getItem('autocartApiUrl')||'';if(saved)return saved.replace(/\/$/,'');try{return (nativeBridge()?.getApiUrl?.()||'').replace(/\/$/,'')}catch{return ''}}
-function sameOriginApi(){return location.protocol==='http:'||location.protocol==='https:'?location.origin:''}
+function sameOriginApi(){if(!(location.protocol==='http:'||location.protocol==='https:'))return '';const h=location.hostname.toLowerCase();if(h==='localhost'||h==='127.0.0.1'||h==='::1')return '';return location.origin}
 function activeApi(){return getConfiguredApi()||sameOriginApi()}
 function setStatus(msg,cls=''){const e=$('status');e.textContent=msg;e.className='status '+cls}
 function setMode(){const explicit=getConfiguredApi();const hosted=sameOriginApi();$('apiUrl').value=explicit;const b=$('modeBadge');b.textContent=explicit||hosted?'AI READY':'OFFLINE READY';b.className='badge '+(explicit||hosted?'ok':'warn')}
