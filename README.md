@@ -1,58 +1,61 @@
 # AutoCart
 
-AutoCart is an AI-powered shopping command app for **Android and PC**.
+AutoCart is an AI-powered shopping assistant for **Android and PC**. It prepares shopping lists and retailer handoffs; **it never purchases, submits, or pays for an order. The consumer reviews the cart and completes checkout with the retailer.**
 
-Type or say:
+## Three ways to shop
 
-> Load chicken parmesan to Walmart for 4 people under $40.
+1. **Say/type a request** — `Load chicken parmesan to GIANT for 4 people under $40.`
+2. **Type a list** — one item per line. Press Enter for the next item. `2 milk` and `bread | 2 loaves` are supported.
+3. **Upload a file** — photos/images, PDFs, CSV/TXT and supported spreadsheets/office documents can be converted into an editable shopping plan when the AutoCart AI Worker is enabled.
 
-AutoCart turns the request into a clean ingredient/shopping plan and creates retailer handoffs without mixing culinary quantities into retailer search terms.
+## Android + PC
 
-## Clients
+- **Android:** native shell with voice recognition, secure WebViewAssetLoader local assets, clipboard support, retailer handoffs and native file selection.
+- **PC:** installable PWA for Chrome/Edge plus a Windows localhost launcher.
+- Both clients use the same `web/` code so the feature set stays synchronized.
 
-- **Android:** native WebView shell with Android voice recognition, clipboard and retailer handoff bridge.
-- **PC:** installable PWA for Chrome/Edge. It can be pinned and launched in its own desktop window.
-- Both clients use the exact same files in `web/`, so UI and shopping logic stay synchronized.
+## Grocery chains
 
-## Retailers
+AutoCart includes **GIANT (The GIANT Company)** and keeps it separate from **Giant Food**. Grocery destinations also include Wegmans, ShopRite, ACME Markets, Weis Markets, Kroger, Albertsons, Safeway, Publix, ALDI, Food Lion, Stop & Shop, H-E-B, Meijer, Sprouts, Whole Foods, Harris Teeter and Giant Eagle, plus Walmart, Target, Costco and Sam's Club.
 
-Walmart, Amazon, Target, Best Buy, eBay, Home Depot, Lowe's, Costco, Sam's Club, Etsy, Newegg, Chewy and Wayfair.
+## Other retailers
 
-## AI behavior
+Amazon, Best Buy, eBay, Home Depot, Lowe's, Etsy, Newegg, Chewy and Wayfair remain supported as retailer handoffs.
 
-Known recipes work even if the network or AI binding is unavailable. The Cloudflare Worker adds Workers AI for recipes and shopping requests outside the built-in library.
+## AI and offline behavior
 
-The Worker also serves the PC PWA as static assets, so one deployment gives you both:
+Built-in recipes and typed shopping lists work without the Worker. The Cloudflare Worker adds unrestricted recipe/shopping interpretation and document extraction. TXT/CSV/TSV imports can be read locally; richer document formats use the configured Worker.
 
-- `https://<autocart-worker>/` — PC AutoCart
-- `https://<autocart-worker>/api/command` — Android/PC AI command API
+The Worker serves both the PC PWA and API routes:
+
+- `/` — AutoCart PC/PWA
+- `/api/command` — natural-language shopping command API
+- `/api/import` — document/image/spreadsheet shopping-item extraction
+- `/api/health` — service health
 
 ## Repository layout
 
 ```text
 web/       Shared PC + Android client/PWA
 android/   Native Android wrapper
-worker/    Cloudflare Worker + Workers AI API
+worker/    Cloudflare Worker + Workers AI API/import
 scripts/   Local tests
 .github/   APK and Worker CI/deploy workflows
+desktop/   Windows local launcher
 ```
 
-## Local tests
+## Test
 
 ```bash
 ./scripts/test-all.sh
 ```
 
-## Android build
+GitHub Actions also validates the Worker/PWA and builds the Android APK.
 
-The project targets Android 16 / API 36. GitHub Actions builds a debug APK on changes to `android/` or `web/`.
+## Android release
 
-The default application ID is `com.autocart.app`. For an update to an existing Google Play listing, set the repository secret `AUTOCART_APPLICATION_ID` to the existing app's package ID before building the release version.
+AutoCart 3.2.0 targets Android API 36. The default application ID is `com.autocart.app`; for an update to an existing Google Play listing, set `AUTOCART_APPLICATION_ID` to that listing's exact package ID before release signing/building.
 
-## PC install
+## Privacy and checkout
 
-After the Worker is deployed, open the AutoCart URL in Edge or Chrome and choose **Install AutoCart** / **Install this site as an app**. AutoCart then launches like a normal Windows app.
-
-## Walmart note
-
-AutoCart prepares the shopping plan and opens retailer product searches/handoffs. Checkout stays inside Walmart. AutoCart does not store Walmart credentials and does not claim a public consumer-cart API that Walmart does not expose.
+AutoCart does not store retailer passwords or process retailer payment. Uploaded documents may be sent to the configured Cloudflare Worker/AI service for extraction. See `web/privacy.html` and `web/disclaimer.html` for the in-app policies.
