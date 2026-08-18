@@ -2,6 +2,6 @@
   "name":"autocart-worker",
   "private":true,
   "type":"module",
-  "scripts":{"test":"node test/smoke.mjs","check":"node --input-type=module --check < src/index.js"},
+  "scripts":{"test":"node test/smoke.mjs && node test/store-router.mjs","check":"node --input-type=module --check < src/store-router-v2.js"},
   "devDependencies":{"wrangler":"^4.0.0"}
 }
