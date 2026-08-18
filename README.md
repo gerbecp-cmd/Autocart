@@ -4,23 +4,31 @@ AutoCart is an AI-powered shopping assistant for **Android and PC**. It prepares
 
 ## Three ways to shop
 
-1. **Say/type a request** — `Load chicken parmesan to GIANT for 4 people under $40.`
-2. **Type a list** — one item per line. Press Enter for the next item. `2 milk` and `bread | 2 loaves` are supported.
-3. **Upload a file** — photos/images, PDFs, CSV/TXT and supported spreadsheets/office documents can be converted into an editable shopping plan when the AutoCart AI Worker is enabled.
+1. **Say/type a request** — `Load chicken parmesan to Walmart for 4 people under $40.`
+2. **Type a list** — one item per line. `2 milk` and `bread | 2 loaves` are supported.
+3. **Upload a file** — photos/images, PDFs, CSV/TXT and supported spreadsheets/office documents can be converted into a shopping plan when the AutoCart AI Worker is enabled.
 
 ## Android + PC
 
-- **Android:** native shell with voice recognition, secure WebViewAssetLoader local assets, clipboard support, retailer handoffs and native file selection.
+- **Android:** native shell with voice recognition, secure local web assets, clipboard support, retailer handoffs and native file selection.
 - **PC:** installable PWA for Chrome/Edge plus a Windows localhost launcher.
-- Both clients use the same `web/` code so the feature set stays synchronized.
+- Both clients use the same `web/` code so features and retailer support stay synchronized.
 
-## Grocery chains
+## 65-store network
 
-AutoCart includes **GIANT (The GIANT Company)** and keeps it separate from **Giant Food**. Grocery destinations also include Wegmans, ShopRite, ACME Markets, Weis Markets, Kroger, Albertsons, Safeway, Publix, ALDI, Food Lion, Stop & Shop, H-E-B, Meijer, Sprouts, Whole Foods, Harris Teeter and Giant Eagle, plus Walmart, Target, Costco and Sam's Club.
+AutoCart now exposes **65 retailer destinations** through categorized pickers and natural-language recognition.
 
-## Other retailers
+- **Major stores & marketplaces:** Walmart, Amazon, Target, eBay, Etsy.
+- **Grocery & warehouse:** GIANT, Giant Food, Wegmans, ShopRite, ACME, Weis, Kroger, Albertsons, Safeway, Publix, ALDI, Food Lion, Stop & Shop, H-E-B, Meijer, Sprouts, Whole Foods, Harris Teeter, Giant Eagle, Costco, Sam's Club, BJ's Wholesale Club.
+- **Electronics, gaming & office:** Best Buy, Newegg, Staples, Office Depot, B&H Photo, Micro Center, GameStop.
+- **Home, hardware & crafts:** Home Depot, Lowe's, Wayfair, Ace Hardware, Harbor Freight, Tractor Supply, Menards, IKEA, Michaels.
+- **Pharmacy & value:** CVS, Walgreens, Dollar General, Dollar Tree.
+- **Pet:** Chewy, Petco, PetSmart.
+- **Sports & outdoors:** DICK'S Sporting Goods, Academy Sports + Outdoors, REI, SCHEELS, Bass Pro Shops, Cabela's.
+- **Beauty & department:** Ulta Beauty, Sephora, Kohl's, Macy's, Nordstrom, JCPenney.
+- **Auto parts:** AutoZone, Advance Auto Parts, O'Reilly Auto Parts.
 
-Amazon, Best Buy, eBay, Home Depot, Lowe's, Etsy, Newegg, Chewy and Wayfair remain supported as retailer handoffs.
+The store picker can override the retailer in an AI command, and the same categorized store list is available for typed lists and file imports.
 
 ## AI and offline behavior
 
@@ -54,7 +62,7 @@ GitHub Actions also validates the Worker/PWA and builds the Android APK.
 
 ## Android release
 
-AutoCart 3.2.0 targets Android API 36. The default application ID is `com.autocart.app`; for an update to an existing Google Play listing, set `AUTOCART_APPLICATION_ID` to that listing's exact package ID before release signing/building.
+AutoCart 3.3.0 targets Android API 36. The default application ID is `com.autocart.app`; for an update to an existing Google Play listing, set `AUTOCART_APPLICATION_ID` to that listing's exact package ID before release signing/building.
 
 ## Privacy and checkout
 
