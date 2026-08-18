@@ -2,8 +2,8 @@ plugins { id("com.android.application") }
 
 val configuredApiUrl = (project.findProperty("AUTOCART_API_URL") as String?) ?: ""
 val configuredApplicationId = (project.findProperty("AUTOCART_APPLICATION_ID") as String?) ?: "com.autocart.app"
-val configuredVersionCode = (project.findProperty("AUTOCART_VERSION_CODE") as String?)?.toIntOrNull() ?: 330
-val configuredVersionName = (project.findProperty("AUTOCART_VERSION_NAME") as String?) ?: "3.3.0"
+val configuredVersionCode = (project.findProperty("AUTOCART_VERSION_CODE") as String?)?.toIntOrNull() ?: 340
+val configuredVersionName = (project.findProperty("AUTOCART_VERSION_NAME") as String?) ?: "3.4.0"
 
 android {
     namespace = "com.autocart.app"
