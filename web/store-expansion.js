@@ -59,8 +59,9 @@
 
   function escapeRegExp(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
   function aliasMatch(text,alias){return new RegExp('(^|[^a-z0-9])'+escapeRegExp(alias)+'(?=$|[^a-z0-9])','i').test(text)}
+  function detectionText(text){return String(text||'').toLowerCase().replace(/[’']/g,"'").replace(/\bpantry\s+staples\b/g,'pantry')}
   function detect(text){
-    const original=String(text||'');const t=original.toLowerCase().replace(/[’']/g,"'");const matches=[];
+    const original=String(text||'');const t=detectionText(original);const matches=[];
     Object.entries(core.RETAILER_META).forEach(([id,meta])=>meta.aliases.forEach(a=>{
       const alias=String(a).toLowerCase();
       if(id==='giantpa'&&alias==='giant'){
@@ -81,7 +82,7 @@
   const oldBuildOffline=core.buildOfflinePlan;
   core.buildOfflinePlan=function(text){const plan=oldBuildOffline(text);if(plan?.ok){plan.retailer=detect(text)||'walmart';if(plan.preferences)plan.preferences.retailer=plan.retailer}return plan};
   const oldNormalizeRemote=core.normalizeRemote;
-  core.normalizeRemote=function(data,text){const plan=oldNormalizeRemote(data,text);const explicit=detect(text);if(plan?.ok&&explicit)plan.retailer=explicit;return plan};
+  core.normalizeRemote=function(data,text){const plan=oldNormalizeRemote(data,text);const explicit=detect(text);if(plan?.ok)plan.retailer=explicit||((plan.preferences?.retailer==='staples'&&/\bpantry\s+staples\b/i.test(text))?'walmart':plan.retailer);return plan};
   const oldNormalizeImported=core.normalizeImportedPlan;
   core.normalizeImportedPlan=function(data,retailer){const plan=oldNormalizeImported(data,retailer);if(plan?.ok&&core.RETAILER_META[retailer])plan.retailer=retailer;return plan};
 
