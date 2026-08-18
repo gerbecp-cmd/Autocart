@@ -12,7 +12,7 @@
     sallybeauty:{label:'Sally Beauty',aliases:['sally beauty','sallybeauty'],base:'https://www.sallybeauty.com/search-show?q=',mode:'query'},
     fivebelow:{label:'Five Below',aliases:['five below'],base:'https://www.fivebelow.com/search?q=',mode:'query'},
     familydollar:{label:'Family Dollar',aliases:['family dollar'],base:'https://www.familydollar.com/searchresults?Ntt=',mode:'query'},
-    apple:{label:'Apple',aliases:['apple store','apple'],base:'https://www.apple.com/us/search/',mode:'path'},
+    apple:{label:'Apple Store',aliases:['apple store'],base:'https://www.apple.com/us/search/',mode:'path'},
     samsung:{label:'Samsung',aliases:['samsung'],base:'https://www.samsung.com/us/search/searchMain/?searchTerm=',mode:'query'},
     dell:{label:'Dell',aliases:['dell'],base:'https://www.dell.com/en-us/search/',mode:'path'},
     lenovo:{label:'Lenovo',aliases:['lenovo'],base:'https://www.lenovo.com/us/en/search?text=',mode:'query'},
@@ -114,10 +114,11 @@
   async function prepareCommand(text,selected,api){
     if(selected==='__best__'){const picked=await recommendStore(text,api);recordRecent(picked.retailer);return {command:setRetailerInCommand(text,picked.retailer),retailer:picked.retailer,source:picked.source,best:true}}
     if(core.RETAILER_META[selected]){recordRecent(selected);return {command:setRetailerInCommand(text,selected),retailer:selected,source:'selected',best:false}}
+    if(/\b(?:at|from|to)\s+apple\b/i.test(String(text||''))){recordRecent('apple');return {command:setRetailerInCommand(text,'apple'),retailer:'apple',source:'command',best:false}}
     const detected=expansion?.detect?.(text);if(detected)recordRecent(detected);return {command:String(text||''),retailer:detected||null,source:'command',best:false};
   }
 
-  function orderedGroups(){return Object.entries(groups).map(([name,ids])=>[name,[...new Set(ids)].filter(id=>core.RETAILER_META[id])])}
+  function orderedGroups(){const seen=new Set();return Object.entries(groups).map(([name,ids])=>[name,[...new Set(ids)].filter(id=>core.RETAILER_META[id]&&!seen.has(id)&&(seen.add(id),true))]).filter(([,ids])=>ids.length)}
   function fillCommandPicker(){
     if(!doc)return;const select=doc.getElementById('commandRetailer');if(!select)return;const current=select.value;
     select.innerHTML='<option value="">Use store named in command (default Walmart)</option><option value="__best__">✨ Best Store — AutoCart chooses</option>';
