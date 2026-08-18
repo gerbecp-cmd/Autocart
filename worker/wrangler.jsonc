@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "autocart",
-  "main": "src/index.js",
+  "main": "src/store-router-v2.js",
   "compatibility_date": "2026-08-17",
   "compatibility_flags": ["nodejs_compat"],
   "ai": {"binding": "AI"},
