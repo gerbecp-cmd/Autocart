@@ -13,10 +13,11 @@
     document.querySelectorAll('[data-retailer-select]').forEach(select=>{
       select.innerHTML='<option value="__best__">✨ Best Store — AutoCart chooses</option>';
       if(groups){
+        const seen=new Set();
         Object.entries(groups).forEach(([groupName,ids])=>{
           const group=document.createElement('optgroup');
           group.label=groupName;
-          ids.filter(id=>AutoCartCore.RETAILER_META?.[id]).forEach(id=>{
+          ids.filter(id=>AutoCartCore.RETAILER_META?.[id]&&!seen.has(id)&&(seen.add(id),true)).forEach(id=>{
             const option=document.createElement('option');
             option.value=id;
             option.textContent=AutoCartCore.retailerLabel(id);
