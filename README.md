@@ -14,31 +14,33 @@ AutoCart is an AI-powered shopping assistant for **Android and PC**. It prepares
 - **PC:** installable PWA for Chrome/Edge plus a Windows localhost launcher.
 - Both clients use the same `web/` code so features and retailer support stay synchronized.
 
-## 65-store network
+## 115-store smart network
 
-AutoCart now exposes **65 retailer destinations** through categorized pickers and natural-language recognition.
+AutoCart now exposes **115 retailer destinations** through natural-language recognition, categorized pickers and a searchable store directory.
 
-- **Major stores & marketplaces:** Walmart, Amazon, Target, eBay, Etsy.
-- **Grocery & warehouse:** GIANT, Giant Food, Wegmans, ShopRite, ACME, Weis, Kroger, Albertsons, Safeway, Publix, ALDI, Food Lion, Stop & Shop, H-E-B, Meijer, Sprouts, Whole Foods, Harris Teeter, Giant Eagle, Costco, Sam's Club, BJ's Wholesale Club.
-- **Electronics, gaming & office:** Best Buy, Newegg, Staples, Office Depot, B&H Photo, Micro Center, GameStop.
-- **Home, hardware & crafts:** Home Depot, Lowe's, Wayfair, Ace Hardware, Harbor Freight, Tractor Supply, Menards, IKEA, Michaels.
-- **Pharmacy & value:** CVS, Walgreens, Dollar General, Dollar Tree.
-- **Pet:** Chewy, Petco, PetSmart.
-- **Sports & outdoors:** DICK'S Sporting Goods, Academy Sports + Outdoors, REI, SCHEELS, Bass Pro Shops, Cabela's.
-- **Beauty & department:** Ulta Beauty, Sephora, Kohl's, Macy's, Nordstrom, JCPenney.
-- **Auto parts:** AutoZone, Advance Auto Parts, O'Reilly Auto Parts.
+Store tools include:
 
-The store picker can override the retailer in an AI command, and the same categorized store list is available for typed lists and file imports.
+- **Best Store** — Workers AI chooses a retailer by product/category fit when the Worker is connected; a deterministic smart matcher is used offline.
+- **Store search** — quickly filters the full retailer network.
+- **Favorites** — star frequently used stores and return to them instantly.
+- **Recent Stores** — remembers the most recently used retailer destinations on the device.
+- **Store override** — force any supported retailer for commands, typed lists or imported files.
+- **Shared Android/PC network** — the same retailer engine is packaged into both clients.
+
+Major categories include grocery/warehouse, marketplaces, pharmacy/value, computers/mobile/electronics, clothing/shoes, beauty, tools/industrial/farm, outdoor/adventure, home/furniture/kitchen, pet, auto parts/tires, books/crafts/gifts and department stores.
+
+The expanded network includes the original AutoCart destinations plus stores such as Rite Aid, Sally Beauty, Five Below, Family Dollar, Apple Store, Samsung, Dell, Lenovo, HP, Nike, adidas, Under Armour, Old Navy, Gap, Foot Locker, Zappos, DSW, Finish Line, Skechers, Crocs, Bath & Body Works, Victoria's Secret, lululemon, Northern Tool + Equipment, Grainger, Fastenal, Rural King, Fleet Farm, Sportsman's Warehouse, Backcountry, L.L.Bean, Patagonia, The North Face, Columbia Sportswear, At Home, Pottery Barn, West Elm, Crate & Barrel, World Market, Williams Sonoma, Sur La Table, Ashley, Rooms To Go, NAPA Auto Parts, Tire Rack, CarParts.com, Barnes & Noble, Books-A-Million, Boscov's and Hobby Lobby.
 
 ## AI and offline behavior
 
-Built-in recipes and typed shopping lists work without the Worker. The Cloudflare Worker adds unrestricted recipe/shopping interpretation and document extraction. TXT/CSV/TSV imports can be read locally; richer document formats use the configured Worker.
+Built-in recipes and typed shopping lists work without the Worker. The Cloudflare Worker adds unrestricted recipe/shopping interpretation, document extraction and AI Best Store recommendations. TXT/CSV/TSV imports can be read locally; richer document formats use the configured Worker.
 
 The Worker serves both the PC PWA and API routes:
 
 - `/` — AutoCart PC/PWA
 - `/api/command` — natural-language shopping command API
 - `/api/import` — document/image/spreadsheet shopping-item extraction
+- `/api/store-recommendation` — AI-assisted Best Store selection with offline fallback
 - `/api/health` — service health
 
 ## Repository layout
@@ -46,7 +48,7 @@ The Worker serves both the PC PWA and API routes:
 ```text
 web/       Shared PC + Android client/PWA
 android/   Native Android wrapper
-worker/    Cloudflare Worker + Workers AI API/import
+worker/    Cloudflare Worker + Workers AI API/import/store selection
 scripts/   Local tests
 .github/   APK and Worker CI/deploy workflows
 desktop/   Windows local launcher
@@ -62,7 +64,7 @@ GitHub Actions also validates the Worker/PWA and builds the Android APK.
 
 ## Android release
 
-AutoCart 3.3.0 targets Android API 36. The default application ID is `com.autocart.app`; for an update to an existing Google Play listing, set `AUTOCART_APPLICATION_ID` to that listing's exact package ID before release signing/building.
+AutoCart 3.4.0 targets Android API 36. The default application ID is `com.autocart.app`; for an update to an existing Google Play listing, set `AUTOCART_APPLICATION_ID` to that listing's exact package ID before release signing/building.
 
 ## Privacy and checkout
 
