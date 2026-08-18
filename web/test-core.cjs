@@ -19,6 +19,8 @@ assert.equal(expansion.detect('get brake pads at AutoZone'),'autozone');
 assert.equal(expansion.detect('replace my air filter'),null);
 assert.equal(expansion.detect('buy a giant inflatable snowman'),null);
 assert.equal(expansion.detect('buy groceries at GIANT'),'giantpa');
+assert.equal(expansion.detect('skip pantry staples'),null);
+assert.equal(expansion.detect('buy printer paper at Staples'),'staples');
 assert(core.handoffUrl('walgreens','toothpaste').startsWith('https://www.walgreens.com/q/toothpaste'));
 assert(core.handoffUrl('harborfreight','cordless drill').includes('harborfreight.com/search?q=cordless%20drill'));
 assert(core.handoffUrl('microcenter','gaming laptop').includes('microcenter.com/search/search_results.aspx?Ntt=gaming%20laptop'));
@@ -29,5 +31,6 @@ assert(core.handoffUrl('oreilly','wiper blades').includes('oreillyauto.com/searc
 const forced=expansion.setRetailerInCommand('Load chicken parmesan to Walmart for 4','petco');assert(forced.toLowerCase().includes('petco'));assert(!forced.toLowerCase().includes('walmart'));
 
 p=core.buildOfflinePlan('Load chicken parmesan with giant breadcrumbs for 4');assert.equal(p.retailer,'walmart');
+p=core.buildOfflinePlan('Load chicken alfredo for 4, skip pantry staples');assert.equal(p.retailer,'walmart');
 p=core.buildOfflinePlan('Load something completely unknown to Walmart');assert(!p.ok&&p.needsAI);
 console.log('AutoCart core + 65-store routing tests PASS');
