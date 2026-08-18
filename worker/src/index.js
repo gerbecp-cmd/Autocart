@@ -26,7 +26,7 @@ const jsonHeaders={'content-type':'application/json; charset=utf-8','access-cont
 function norm(v){return String(v||'').toLowerCase().replace(/[’']/g,"'").replace(/\s+/g,' ').trim()}
 function escapeRegExp(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
 function retailerFrom(command){
-  const original=String(command||''),t=norm(command),matches=[];
+  const original=String(command||''),t=norm(command).replace(/\bpantry\s+staples\b/g,'pantry'),matches=[];
   for(const id of RETAILERS)for(const alias of RETAILER_ALIASES[id]){
     const a=norm(alias);
     if(id==='giantpa'&&a==='giant'){
