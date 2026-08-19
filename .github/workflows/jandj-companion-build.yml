@@ -3,6 +3,8 @@ name: Build J&J War Room Companion APK
 on:
   push:
     branches: [ "warroom-companion-build" ]
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
