@@ -1,0 +1,38 @@
+name: Build Highlight Reword APK
+
+on:
+  push:
+    branches:
+      - highlight-reword-build
+    paths:
+      - ".github/workflows/highlight-reword-build.yml"
+      - "highlight-reword-source.b64"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+      - name: Restore Android project
+        run: |
+          mkdir -p highlight-reword
+          base64 -d highlight-reword-source.b64 > /tmp/highlight-reword.zip
+          unzip -q /tmp/highlight-reword.zip -d highlight-reword
+      - name: Build APK
+        working-directory: highlight-reword
+        run: gradle --no-daemon assembleDebug
+      - name: Rename APK
+        run: |
+          cp highlight-reword/app/build/outputs/apk/debug/app-debug.apk Highlight-Reword-v1.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Highlight-Reword-APK
+          path: Highlight-Reword-v1.apk
