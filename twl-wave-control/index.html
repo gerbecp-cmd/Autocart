@@ -65,7 +65,7 @@ body.print-preview .top,body.print-preview .tabs,body.print-preview .wrap{displa
   <div class="brand">TWL <span>WAVE CONTROL CENTER v5.6 LIVE</span></div>
   <div id="lastImport" class="small"></div>
   <div class="actions">
-    <label class="btn primary" for="upload">Upload Order Drop CSV</label><input id="upload" type="file" accept=".csv,text/csv">
+    <label class="btn primary" for="upload">Upload Order Drop</label><input id="upload" type="file" accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
     <button class="btn" id="backupBtn">Backup CSV</button><button class="btn" id="exportProof">Export Zone Audit</button><button class="btn" id="saveWorkspace">Save Workspace</button><label class="btn" for="restoreWorkspace">Restore Workspace</label><input id="restoreWorkspace" type="file" accept=".json,application/json">
   </div>
 </div>
@@ -146,7 +146,8 @@ body.print-preview .top,body.print-preview .tabs,body.print-preview .wrap{displa
 
 <div id="noteModal" class="modal"><div class="modalbox" style="max-width:650px"><div class="modalhead"><b id="noteTitle">Wave Note</b><button class="btn" id="noteClose">Close</button></div><div class="modalbody"><textarea id="noteText" placeholder="Note..."></textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px"><button class="btn red" id="noteClear">Clear</button><button class="btn primary" id="noteSave">Save</button></div></div></div></div>
 
-<script>const PRELOADED_STATE={"schema":"5.6","orders":[],"waveMeta":{},"orderMeta":{},"archive":{},"source":null,"lastImport":null};\nconst VERSION='5.6', STORE='twl_wave_control_center_v5_6_live';
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>const PRELOADED_STATE={"schema":"5.6.1","orders":[],"waveMeta":{},"orderMeta":{},"archive":{},"source":null,"lastImport":null};\nconst VERSION='5.6.1', STORE='twl_wave_control_center_v5_6_1_live';
 const PICKERS={A:'Alex R',B:'Jason B',C:'Christine K',D:'Kamari',E:'Christine K',F:'Mark Romano',F1:'Thom H'};
 const ROLL_ZONES=['A','B','C','D','E','F','F1'];
 const LEGACY_STORES=['twl_wave_control_center_v5_4_loaded_43b15f8bb3af','twl_wave_control_center_v5_4_source_audit'];
@@ -266,7 +267,7 @@ function sourceText(){
  const provenance=s.kind==='preloaded'?'last chat upload '+displayDate(s.uploadedAt):s.kind==='reference'?'original reference snapshot':'uploaded '+displayDate(s.importedAt);
  return `${s.filename} • ${state.orders.length} unique order rows • ${provenance}`;
 }
-function sourceHint(){return state.source?.kind==='preloaded'?'UPLOAD YOUR CURRENT ORDER DROP — browser-local data only':state.source?.kind==='reference'?'REFERENCE SNAPSHOT — not current live TWL data':'FILE SNAPSHOT — not a live TWL connection'}
+function sourceHint(){return state.source?.kind==='preloaded'?'LAST UPLOADED ORDER DROP — file snapshot, not live TWL':state.source?.kind==='reference'?'REFERENCE SNAPSHOT — not current live TWL data':'FILE SNAPSHOT — not a live TWL connection'}
 function notice(message){$('appError').hidden=!message;$('appError').textContent=message||''}
 function showPage(id){if(!$(id))return;document.querySelectorAll('.page,.tab').forEach(e=>e.classList.remove('active'));$(id).classList.add('active');document.querySelector(`.tab[data-page="${id}"]`)?.classList.add('active')}
 function waveButton(w){return `<button class="wavebtn" data-wave="${esc(w)}" type="button">${esc(w)}</button>`}
@@ -278,7 +279,7 @@ function proofButton(g){return `<button class="btn proofbtn" data-proof="1" data
 function render(){
  const ag=aggregate(),waves=sortedEntries(ag),ao=activeOrders(),singles=new Set(ao.filter(o=>!isMultiOrder(o)&&!isIntl(o)).map(o=>o.wave)),multis=new Set(ao.filter(o=>isMultiOrder(o)&&!isIntl(o)).map(o=>o.wave)),intls=waves.filter(g=>g.isIntl);
  $('lastImport').textContent=state.source?state.source.filename:'Upload a current drop to begin';
- $('sourceBanner').innerHTML=state.source?`<span class="source-label">${sourceHint()}</span><br><b>${esc(sourceText())}</b><br>${n(ao.length)} active order rows; ${n(state.orders.length-ao.length)} excluded. IC work is excluded from every working view. Each successful upload replaces the prior waves, notes, IC holds, control statuses and archive.${state.source.duplicates?` ${n(state.source.duplicates)} duplicate rows removed.`:''}${storageWarning?'<br>'+esc(storageWarning):''}`:`<span class="source-label">UPLOAD YOUR CURRENT ORDER DROP</span><br>Use <b>Upload Order Drop CSV</b> for a new file, or <b>Restore Workspace</b> for a saved workspace including IC holds.${storageWarning?'<br>'+esc(storageWarning):''}`;
+ $('sourceBanner').innerHTML=state.source?`<span class="source-label">${sourceHint()}</span><br><b>${esc(sourceText())}</b><br>${n(ao.length)} active order rows; ${n(state.orders.length-ao.length)} excluded. IC work is excluded from every working view. Each successful upload replaces the prior waves, notes, IC holds, control statuses and archive.${state.source.duplicates?` ${n(state.source.duplicates)} duplicate rows removed.`:''}${storageWarning?'<br>'+esc(storageWarning):''}`:`<span class="source-label">UPLOAD YOUR CURRENT ORDER DROP</span><br>Use <b>Upload Order Drop</b> for a CSV or Excel export, or <b>Restore Workspace</b> for a saved workspace including IC holds.${storageWarning?'<br>'+esc(storageWarning):''}`;
  $('sourceBanner').innerHTML+=`<details class="source-details"><summary>Show source file and matched columns</summary><div>${esc(state.source?.filename||'No file')}<br>File fingerprint: ${esc(state.source?.sha256?.slice(0,16)||'not recorded')}<br>${Object.entries(state.source?.headerMap||{}).filter(([,v])=>v).map(([k,v])=>`${esc(k)} ← ${esc(v.header)} (column ${v.column})`).join('<br>')}</div></details>`;
   const kpis=[['waves','Active Waves',waves.length],['orders','Active Orders',ao.length],['lines','Lines / Picks',ao.reduce((a,o)=>a+Number(o.lines),0)],['single','Single-Line Waves',singles.size],['multi','Multi-Line Waves',multis.size],['intl','International Waves',intls.length],['archive','Archived Waves',Object.keys(state.archive).filter(w=>!waveIC(w)).length]];
  $('kpis').innerHTML=kpis.map(([k,l,v])=>`<button class="kpi clickable" data-kpi="${k}"><div class="n">${n(v)}</div><div class="l">${l}</div></button>`).join('');
@@ -420,7 +421,19 @@ function parseImport(text){
  return {orders,duplicates,headerMap:Object.fromEntries(Object.entries(cols).map(([k,i])=>[k,i>=0?{column:i+1,header:h[i]}:null]))};
 }
 async function uploadFile(file){
- const bytes=await file.arrayBuffer(),text=new TextDecoder('utf-8').decode(bytes),parsed=parseImport(text);
+ const bytes=await file.arrayBuffer();
+ let text='';
+ const lower=String(file.name||'').toLowerCase();
+ if(lower.endsWith('.xlsx')||lower.endsWith('.xls')){
+  if(typeof XLSX==='undefined')throw new Error('Excel reader did not load. Check the internet connection and try again.');
+  const book=XLSX.read(bytes,{type:'array',cellDates:false});
+  const sheet=book.Sheets[book.SheetNames[0]];
+  if(!sheet)throw new Error('The Excel workbook has no readable worksheet.');
+  text=XLSX.utils.sheet_to_csv(sheet,{FS:',',RS:'\r\n',blankrows:false});
+ }else{
+  text=new TextDecoder('utf-8').decode(bytes);
+ }
+ const parsed=parseImport(text);
  let sha256='';try{sha256=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){}
  const fresh={...initialState(),orders:parsed.orders,source:{filename:file.name,kind:'upload',importedAt:new Date().toISOString(),duplicates:parsed.duplicates,headerMap:parsed.headerMap,sha256},lastImport:file.name};
  state=fresh;rawOnlyActive=false;detailTarget=null;noteTarget=null;
@@ -430,7 +443,7 @@ async function uploadFile(file){
 function saveWorkspace(){downloadText(JSON.stringify({...state,schema:VERSION},null,2),'TWL_Workspace_with_IC.json','application/json')}
 async function restoreWorkspace(file){
  const saved=JSON.parse(await file.text());
- if(!saved||!['5.4',VERSION].includes(saved.schema)||!Array.isArray(saved.orders)||!saved.source||saved.orders.some(o=>!o||typeof o!=='object'||typeof o.order!=='string'||!('wave'in o)||!('zone'in o)))throw new Error('This is not a supported TWL saved workspace. Your current data was kept.');
+ if(!saved||!['5.4','5.6',VERSION].includes(saved.schema)||!Array.isArray(saved.orders)||!saved.source||saved.orders.some(o=>!o||typeof o!=='object'||typeof o.order!=='string'||!('wave'in o)||!('zone'in o)))throw new Error('This is not a supported TWL saved workspace. Your current data was kept.');
  state={...initialState(),...saved,schema:VERSION,orderMeta:saved.orderMeta||{}};
  detailTarget=null;noteTarget=null;rawOnlyActive=false;exitPrint();$('detailModal').classList.remove('show');$('noteModal').classList.remove('show');saveLocal();notice('');render();showPage('zones');
 }
