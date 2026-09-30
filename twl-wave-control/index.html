@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TWL Wave Control Center v5.5 — Zone Numbers + IC</title>
+<style>
+:root{--bg:#0b0f14;--panel:#121820;--panel2:#19212b;--line:#2b3643;--text:#f7f8fa;--muted:#aab5c2;--yellow:#ffd400;--red:#d63e49;--red2:#401317;--green:#42cf7c;--blue:#5ba8ff}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Segoe UI,Arial,sans-serif}
+button,input,select,textarea{font:inherit}.top{position:sticky;top:0;z-index:30;background:#080b0f;border-bottom:1px solid #26313d;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.brand{font-size:22px;font-weight:1000}.brand span{color:var(--yellow)}.actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid #3a4654;background:#1a222c;color:#fff;border-radius:8px;padding:9px 12px;font-weight:800;cursor:pointer}.btn:hover{filter:brightness(1.12)}.btn.primary{background:var(--yellow);border-color:var(--yellow);color:#111}.btn.red{background:#4d171c;border-color:#7e2830}
+input[type=file]{display:none}.tabs{display:flex;gap:6px;padding:12px 16px 0;flex-wrap:wrap}.tab{border:1px solid #2f3a47;border-bottom:none;background:#131a22;color:#ccd4dc;border-radius:8px 8px 0 0;padding:10px 13px;font-weight:900;cursor:pointer}.tab.active{background:#222c37;color:#fff}
+.wrap{max-width:1800px;margin:auto;padding:16px}.page{display:none}.page.active{display:block}
+.kpis{display:grid;grid-template-columns:repeat(7,minmax(125px,1fr));gap:8px;margin-bottom:14px}.kpi{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:12px}.kpi.clickable{cursor:pointer}.kpi.clickable:hover{border-color:#647284}.kpi .n{font-size:27px;font-weight:1000;color:var(--yellow)}.kpi .l{text-transform:uppercase;color:var(--muted);font-size:11px;font-weight:800}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:14px}.panel h2{font-size:16px;margin:0;padding:12px 14px;background:#161e27;border-bottom:1px solid var(--line)}
+.toolbar{padding:10px 12px;background:#10161d;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap}.toolbar input,.toolbar select,.select-big{background:#0b1016;color:#fff;border:1px solid #3a4756;border-radius:8px;padding:9px 11px}
+.note{background:#221d04;border:1px solid #6b5b03;color:#ffec78;padding:10px 12px;border-radius:8px;margin-bottom:12px;font-weight:700}.small{font-size:12px;color:var(--muted)}
+.tablewrap{overflow:auto;max-height:68vh}table{border-collapse:collapse;width:100%;min-width:850px}th{position:sticky;top:0;z-index:2;background:#1b242e;color:#fff;text-align:left;padding:9px;font-size:11px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid #3a4654}td{padding:8px 9px;border-bottom:1px solid #27313b;font-size:13px}tr:hover td{background:#151d25}
+.wavebtn{border:0;background:transparent;color:#fff;text-decoration:underline;text-underline-offset:3px;text-decoration-color:#566372;font-weight:1000;cursor:pointer;padding:0}.wavebtn:hover{color:var(--yellow);text-decoration-color:var(--yellow)}
+.chip{display:inline-block;border:1px solid #415062;background:#202a35;border-radius:999px;padding:3px 7px;margin:1px;font-size:11px;font-weight:800}
+.multi-row td{background:var(--red2)!important;color:#fff}.multi-row td:first-child{border-left:5px solid var(--red)}.multi-row .wavebtn{color:#ffc0c5}.multi-tag{display:inline-block;background:#731c25;border:1px solid #ff6975;color:#fff;border-radius:999px;padding:3px 7px;font-size:11px;font-weight:900}
+.zone-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}.zone-word{font-size:42px;font-weight:1000;color:var(--yellow)}.select-big{font-size:20px;font-weight:900;min-width:120px}.zone-summary{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:8px;margin-bottom:14px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;padding:20px;align-items:center;justify-content:center}.modal.show{display:flex}.modalbox{width:min(1250px,98vw);max-height:92vh;overflow:auto;background:#111820;border:1px solid #3b4654;border-radius:12px}.modalhead{position:sticky;top:0;z-index:3;background:#18212b;border-bottom:1px solid #33404d;padding:12px 14px;display:flex;justify-content:space-between;gap:10px;align-items:center}.modalbody{padding:14px}
+textarea{width:100%;min-height:140px;background:#0b1016;color:#fff;border:1px solid #3a4756;border-radius:8px;padding:10px}
+.print-stage{display:none}.print-sheet{background:#fff;color:#111;padding:14px;margin:0 auto 18px;max-width:1200px;border:2px solid #aaa}.print-head{background:#111;color:#fff;border:4px solid #111;padding:10px 14px;display:flex;justify-content:space-between;gap:10px}.print-head h1{margin:0;color:var(--yellow);font-size:34px}.print-summary{border:2px solid #111;border-top:0;padding:8px;font-weight:800}.print-sheet h2{font-size:21px;border-bottom:4px solid var(--yellow);padding-bottom:4px;margin:14px 0 5px}.print-sheet table{min-width:0;color:#111}.print-sheet th{position:static;background:#111;color:#fff}.print-sheet td{color:#111;border-bottom:1px solid #bbb}.print-sheet tr.multi-row td{background:#ffe0e0!important;color:#111}.print-foot{margin-top:12px;background:#111;color:#fff;text-align:center;padding:9px;font-size:20px;font-weight:1000}
+body.print-preview .top,body.print-preview .tabs,body.print-preview .wrap{display:none!important}body.print-preview .print-stage{display:block!important;background:#eee9dd;min-height:100vh;padding:12px}.printbar{display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap;background:#111;color:#fff;padding:10px 12px;margin-bottom:12px}.printbar .group{display:flex;gap:8px;flex-wrap:wrap}
+
+/* v5.6 rolling warehouse dashboard */
+.rolling-board{background:linear-gradient(135deg,#101820,#17365d);border:2px solid #315e8c;border-radius:12px;padding:14px;margin:0 0 14px;color:#fff;box-shadow:0 8px 24px #0005}.rolling-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}.rolling-zone{font-size:48px;line-height:1;font-weight:1000;color:var(--yellow)}.rolling-picker{font-size:19px;font-weight:900;margin-top:4px}.rolling-clock{font-size:20px;font-weight:900;text-align:right}.rolling-grid{display:grid;grid-template-columns:repeat(5,minmax(110px,1fr));gap:8px;margin-top:12px}.rolling-kpi{background:#ffffff12;border:1px solid #ffffff26;border-radius:8px;padding:10px}.rolling-kpi .n{font-size:29px;font-weight:1000;color:#fff}.rolling-kpi .l{font-size:10px;font-weight:900;color:#bfd3e8;text-transform:uppercase;letter-spacing:.5px}.rolling-waves{margin-top:10px;border-top:1px solid #ffffff2c;padding-top:9px}.rolling-wavechips{display:flex;gap:7px;flex-wrap:wrap;margin-top:5px}.rolling-wavechip{background:#fff;color:#10263e;border-radius:5px;padding:6px 9px;font-size:15px;font-weight:1000}.rolling-wavechip.multi{background:#ffd9df;color:#9a1022}.rolling-wavechip.intl{outline:2px solid #f6a04d}.rolling-progress{height:5px;background:#ffffff20;border-radius:9px;overflow:hidden;margin-top:12px}.rolling-progress span{display:block;height:100%;width:0;background:var(--yellow)}.rolling-actions{display:flex;gap:7px;flex-wrap:wrap}.multi-print-table td:first-child{font-weight:1000}.multi-print-table td:nth-child(2){font-weight:900;color:#8b1320}.multi-print-table td:nth-child(3){text-align:center;font-weight:900}.multi-only-badge{display:inline-block;background:#b71c2c;color:#fff;padding:3px 7px;border-radius:4px;font-weight:1000;margin-left:6px}.picker-label{color:#fff;font-weight:900}.zone-controls .btn.multi-print{background:#b71c2c;color:#fff;border-color:#d94d5a}
+@media(max-width:900px){.rolling-grid{grid-template-columns:repeat(2,1fr)}.rolling-zone{font-size:38px}}
+@media print{.rolling-board{display:none!important}.multi-print-table td,.multi-print-table th{font-size:11px!important}}
+@media(max-width:1000px){.kpis{grid-template-columns:repeat(2,1fr)}.zone-summary{grid-template-columns:repeat(2,1fr)}}
+@media print{
+ body.print-preview{background:#fff!important}
+ body.print-preview .printbar{display:none!important}
+ body.print-preview .print-stage{display:block!important;padding:0;background:#fff!important}
+ body.print-preview .print-sheet{max-width:none!important;border:0!important;margin:0!important;page-break-after:always;break-after:page}
+ body.print-preview .print-sheet:last-child{page-break-after:auto;break-after:auto}
+ .print-sheet tr.multi-row td{background:#ffe0e0!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .print-head,.print-sheet th,.print-foot{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ @page{size:landscape;margin:.3in}
+}
+
+#sourceBanner{font-weight:500;line-height:1.45}#sourceBanner b{color:#fff}#sourceBanner .source-label{font-weight:900;color:#ffed83}.empty-state{padding:24px;text-align:center;color:#bfcad5}.proofbtn{white-space:nowrap;color:#ffe97f}.tag-mixed{color:#ffcf6b;font-weight:800}.excluded{color:#ffc2c8}.nobr{white-space:nowrap}.ctrlStatus{background:#0d141b;color:#fff;border:1px solid #637082;padding:7px;border-radius:6px}.kpi.clickable{color:inherit;text-align:left;font:inherit}.kpi.clickable:focus-visible,button:focus-visible{outline:3px solid #ffd400;outline-offset:3px}.btn:disabled{opacity:.45;cursor:not-allowed}.print-source{font-size:10px;font-weight:500}.proof-note{font-size:11px;color:#bed2e2;max-width:230px;white-space:pre-wrap;overflow-wrap:anywhere}.print-head .print-source{max-width:38%;overflow-wrap:anywhere}.print-sheet .multi-label{font-weight:900;color:#b71c2c}.print-sheet tr.multi-row td{border-left:0}.print-sheet tr.multi-row td:first-child{border-left:4px solid #c32637}.print-sheet td,.print-sheet th{font-size:12px;padding:5px 7px}.print-sheet h2{font-size:18px;margin:9px 0 4px}.print-sheet .print-foot{font-size:14px}.print-sheet h1{font-size:28px}.print-sheet .print-summary{font-size:12px}.modal #detailContext{font-weight:500}#detailModal .tablewrap{max-height:55vh!important}
+@media print{body.print-preview .print-sheet{padding:5px;break-inside:avoid}body.print-preview .modal{display:none!important}thead{display:table-header-group}tr{break-inside:avoid}body.print-preview .print-sheet td,body.print-preview .print-sheet th{font-size:10px;padding:3px 5px}body.print-preview .print-sheet h1{font-size:25px}body.print-preview .print-head{padding:7px 10px}body.print-preview .print-foot{font-size:12px;padding:6px}body.print-preview .print-summary{font-size:11px}body.print-preview .print-sheet .multi-row td{background:#ffe0e0!important;color:#861521!important}body.print-preview .print-sheet{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+
+
+.multi-numbers{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;padding:14px}
+.multi-number{display:block;text-align:center;background:#46161d;color:#ffc1c8;border:1px solid #c63749;border-left:5px solid #ea4d60;border-radius:8px;padding:13px 10px;font:900 23px/1.2 'Segoe UI',Arial,sans-serif;text-decoration:none;cursor:pointer;break-inside:avoid}
+.multi-number:hover{background:#651e27}.multi-number:focus-visible{outline:3px solid #ffd400}
+#zoneIntl h3{padding:10px 14px;margin:0;font-size:14px}#zoneIntl table{min-width:650px}
+#ic{scroll-margin-top:30px}.ic-wave-panel{margin-top:14px}.ic-wave-panel h2{background:#3a3010;border-left:5px solid #ffd400}
+#icSearch{flex:1;min-width:180px}#icTabCount{color:#ffe47f}.source-details{margin-top:7px;font-size:11px}.source-details summary{cursor:pointer}.source-details div{padding:8px 0}
+.source-details{max-height:240px;overflow:auto}.print-sheet .multi-numbers{grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;padding:6px 0}
+.print-sheet .multi-number{background:#ffe6e9;color:#a80d25;border:1px solid #ca334a;border-left:4px solid #bf223a;border-radius:3px;font-size:18px;padding:8px;cursor:default;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.print-sheet h3{font-size:12px;margin:7px 0 4px}.intl-print{border-top:2px solid #222;margin-top:10px}.print-sheet .multi-label{color:#a80d25}
+@media(max-width:750px){.top{position:static;padding:14px}.brand{font-size:20px}.actions{margin-left:0;gap:6px}.actions .btn{font-size:12px;padding:8px}.tabs{padding:8px 10px 0}.tab{font-size:12px;padding:9px}.wrap{padding:10px}.zone-word{font-size:30px}.zone-controls{gap:7px}.zone-controls .btn{font-size:13px}.multi-numbers{grid-template-columns:repeat(2,minmax(0,1fr));padding:10px;gap:8px}.multi-number{font-size:22px}.zone-summary{grid-template-columns:repeat(2,1fr)}.modal{padding:5px}.modalhead{align-items:flex-start}.print-sheet .multi-numbers{grid-template-columns:repeat(3,minmax(0,1fr))}.print-sheet .multi-number{font-size:16px}.print-head{flex-wrap:wrap}.print-head .print-source{max-width:100%}}
+@media print{.print-sheet .multi-numbers{grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}.print-sheet .multi-number{font-size:17px;padding:6px 8px;background:#ffe6e9!important;color:#a80d25!important}.print-sheet h3{font-size:10px}.print-sheet .intl-print{margin-top:6px}}
+
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand">TWL <span>WAVE CONTROL CENTER v5.6 LIVE</span></div>
+  <div id="lastImport" class="small"></div>
+  <div class="actions">
+    <label class="btn primary" for="upload">Upload Order Drop CSV</label><input id="upload" type="file" accept=".csv,text/csv">
+    <button class="btn" id="backupBtn">Backup CSV</button><button class="btn" id="exportProof">Export Zone Audit</button><button class="btn" id="saveWorkspace">Save Workspace</button><label class="btn" for="restoreWorkspace">Restore Workspace</label><input id="restoreWorkspace" type="file" accept=".json,application/json">
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-page="dashboard">Dashboard</button>
+  <button class="tab" data-page="zones">PRINT BY ZONE</button>
+  <button class="tab" data-page="multis">Multi-Line</button>
+  <button class="tab" data-page="international">International</button>
+  <button class="tab" data-page="ic">IC <span id="icTabCount"></span></button>
+  <button class="tab" data-page="archive">Archive</button>
+  <button class="tab" data-page="raw">Raw Orders</button>
+</div>
+
+<div class="wrap"><div id="sourceBanner" class="note" role="status"></div><div id="appError" class="note" role="alert" hidden></div>
+  <section id="dashboard" class="page active">
+    <div id="kpis" class="kpis"></div>
+    <div id="rollingBoard" class="rolling-board">
+      <div class="rolling-top"><div><div id="rollingZone" class="rolling-zone">ZONE —</div><div id="rollingPicker" class="rolling-picker">Picker —</div></div><div><div id="rollingClock" class="rolling-clock"></div><div class="rolling-actions"><button class="btn" id="rollingToggle">Pause Rotation</button><button class="btn" id="rollingFull">Fullscreen Board</button></div></div></div>
+      <div id="rollingKpis" class="rolling-grid"></div>
+      <div class="rolling-waves"><b>WAVES ON THIS ZONE</b><div id="rollingWaves" class="rolling-wavechips"></div></div>
+      <div class="rolling-progress"><span id="rollingProgress"></span></div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="btn primary" id="goZonePrint">PRINT ZONE PICK SHEETS</button>
+      <span class="small" style="align-self:center">Pick sheets are organized by ZONE, not by wave.</span>
+    </div>
+    <div class="panel">
+      <h2>Active Waves</h2>
+      <div class="toolbar"><input id="search" placeholder="Search wave / zone / status"><span class="small">Click any wave number to see every loaded order/status in that wave.</span></div>
+      <div class="tablewrap"><table><thead><tr><th>Wave</th><th>Type</th><th>Orders</th><th>Lines</th><th>Zones</th><th>TWL Status</th><th>Control Status</th><th>Note</th></tr></thead><tbody id="wavesBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="zones" class="page">
+    <div class="note"><b>ONE SHEET PER ZONE.</b> Multi sections list only wave numbers, in red. A wave belongs here only when an eligible multi-line order names this exact zone in Custom Data 1. IC holds, completed work, W/T orders and unassigned orders are not on these sheets.</div>
+    <div class="zone-controls">
+      <span class="zone-word">ZONE</span>
+      <select id="zoneSelect" class="select-big"></select>
+      <button id="printZone" class="btn primary">Print This Zone</button>
+      <button id="printAllZones" class="btn">Print All Zone Pick Sheets</button>
+      <button id="printZoneMulti" class="btn multi-print">Print MULTI — This Zone</button>
+      <button id="printAllMultiZones" class="btn multi-print">Print MULTI — All Zones</button>
+    </div>
+    <div id="zoneSummary" class="zone-summary"></div>
+    <div class="panel"><h2 id="singleTitle">Single-Line Orders</h2><div class="tablewrap"><table><thead><tr><th>Wave</th><th>Picks</th><th>Orders</th><th>Zone Order Statuses</th><th>Source Check</th></tr></thead><tbody id="zoneSingle"></tbody></table></div></div>
+    <div class="panel"><h2 id="multiTitle">MULTI-LINE — WAVE NUMBERS ONLY</h2><div id="zoneMulti" class="multi-numbers"></div></div>
+    <div class="panel"><h2 id="zoneIntlTitle">INTERNATIONAL — SEPARATE</h2><div id="zoneIntl"></div></div>
+    <div class="small">Tap a red wave number to check its matching source orders. Printed multi sections contain wave numbers only.</div>
+  </section>
+
+  <section id="multis" class="page">
+    <div class="note">All multi-line waves/orders are highlighted RED. Multi-line work remains on the normal zone sheets, and v5.6 also provides a <b>separate MULTI-LINE pick sheet for every zone</b>.</div><div style="margin-bottom:12px"><button class="btn red" id="printAllMultiZones2">PRINT ALL MULTI-LINE ZONE SHEETS</button></div>
+    <div class="panel"><h2>Active Multi-Line Waves</h2><div class="tablewrap"><table><thead><tr><th>Wave</th><th>Orders</th><th>Total Lines</th><th>Zones in Active Orders</th><th>TWL Status</th><th>Control Status</th></tr></thead><tbody id="multiBody"></tbody></table></div></div>
+  </section>
+
+  <section id="international" class="page">
+    <div class="panel"><h2>Active International Waves</h2><div class="toolbar"><span id="intlSummary" class="small"></span><span class="small">International work prints on the appropriate ZONE pick sheet.</span></div><div class="tablewrap"><table><thead><tr><th>Wave</th><th>Type</th><th>Orders</th><th>Lines</th><th>Zones</th><th>Status</th></tr></thead><tbody id="intlBody"></tbody></table></div></div>
+  </section>
+
+  <section id="ic" class="page">
+    <div class="note"><b>IC HOLD — not on pick sheets or in working totals.</b> A wave hold removes every order in that wave. An order hold removes only that order. Releasing a wave does not release independently held orders. The zone code IC is a location; it does not set a control-status hold.</div>
+    <div class="toolbar"><input id="icSearch" placeholder="Find IC wave, order or note" aria-label="Search IC holds"><button class="btn" id="exportIC">Export IC Only</button><span id="icSummary" class="small"></span></div>
+    <div id="icBody"></div>
+  </section>
+  <section id="archive" class="page">
+    <div class="panel"><h2>Archive</h2><div class="tablewrap"><table><thead><tr><th>Wave</th><th>Type</th><th>Orders</th><th>Lines</th><th>Completed</th><th>Action</th></tr></thead><tbody id="archiveBody"></tbody></table></div></div>
+  </section>
+
+  <section id="raw" class="page">
+    <div class="panel"><h2 id="rawTitle">Source Orders</h2><div class="toolbar"><input id="rawSearch" placeholder="Search order, wave, zone or status"><button class="btn" id="rawAll">Show all source rows</button><button class="btn" id="rawActive">Active only</button></div><div class="tablewrap"><table><thead><tr><th>Source Row</th><th>Order / Suffix</th><th>Wave</th><th>Custom Data 1 — Raw</th><th>Order Lines</th><th>Order Status</th><th>TWL Status</th><th>Route</th><th>Eligibility</th><th>Control</th><th>Note</th></tr></thead><tbody id="rawBody"></tbody></table></div></div>
+  </section>
+</div>
+
+<div id="printStage" class="print-stage"></div>
+
+<div id="detailModal" class="modal"><div class="modalbox"><div class="modalhead"><div><b id="detailTitle"></b><div id="detailSub" class="small"></div></div><button class="btn" id="detailClose">Close</button></div><div class="modalbody"><div id="detailSummary" class="kpis"></div><div id="detailContext" class="note"></div><div class="tablewrap" style="max-height:none"><table><thead><tr><th>Source Row</th><th>Order / Suffix</th><th>Custom Data 1 — Raw</th><th>Order Lines</th><th>Order Status</th><th>TWL Status</th><th>Route</th><th>Eligibility</th><th>Control</th><th>Note</th></tr></thead><tbody id="detailBody"></tbody></table></div></div></div></div>
+
+<div id="noteModal" class="modal"><div class="modalbox" style="max-width:650px"><div class="modalhead"><b id="noteTitle">Wave Note</b><button class="btn" id="noteClose">Close</button></div><div class="modalbody"><textarea id="noteText" placeholder="Note..."></textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px"><button class="btn red" id="noteClear">Clear</button><button class="btn primary" id="noteSave">Save</button></div></div></div></div>
+
+<script>const PRELOADED_STATE={"schema":"5.6","orders":[],"waveMeta":{},"orderMeta":{},"archive":{},"source":null,"lastImport":null};\nconst VERSION='5.6', STORE='twl_wave_control_center_v5_6_live';
+const PICKERS={A:'Alex R',B:'Jason B',C:'Christine K',D:'Kamari',E:'Christine K',F:'Mark Romano',F1:'Thom H'};
+const ROLL_ZONES=['A','B','C','D','E','F','F1'];
+const LEGACY_STORES=['twl_wave_control_center_v5_4_loaded_43b15f8bb3af','twl_wave_control_center_v5_4_source_audit'];
+const ZONE_ORDER=['A','B','C','D','E','F','F1','G','HZ','TR','TK','CR','RC','IC','DO-A7'];
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const n=v=>Number(v||0).toLocaleString();
+const waveNum=v=>String(v??'').replace(/,/g,'').trim();
+const waveSort=(a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true});
+const zoneSort=(a,b)=>{const i=ZONE_ORDER.indexOf(a),j=ZONE_ORDER.indexOf(b);return i>=0&&j>=0?i-j:i>=0?-1:j>=0?1:waveSort(a,b)};
+function zonesOf(o){return [...new Set(String(o.zone||'').split(',').map(z=>z.trim().toUpperCase()).filter(Boolean))]}
+function isMultiOrder(o){return Number(o.lines)>1}
+function isIntl(o){return String(o.route||'').trim().toUpperCase()==='INT'||['YES','Y','TRUE','1'].includes(String(o.international||'').trim().toUpperCase())}
+function sourceKey(o){return JSON.stringify([String(o.order||'').trim().toUpperCase(),String(o.suffix??'').trim(),waveNum(o.wave)])}
+function orderLabel(o){return String(o.order||'')+(o.suffix!==undefined&&o.suffix!==''?' / '+o.suffix:'')}
+function initialState(){return {schema:VERSION,orders:[],waveMeta:{},orderMeta:{},orderNotes:{},archive:{},source:null,lastImport:''}}
+let state=initialState(), rawOnlyActive=false, noteTarget=null, detailTarget=null, storageWarning='';
+function loadLocal(){
+ try{
+  for(const key of [STORE,...LEGACY_STORES]){
+   const saved=JSON.parse(localStorage.getItem(key));
+   if(saved&&['5.4',VERSION].includes(saved.schema)&&Array.isArray(saved.orders)&&saved.source){
+    state={...initialState(),...saved,schema:VERSION,orderMeta:saved.orderMeta||{}};
+    if(key!==STORE)saveLocal();
+    return;
+   }
+  }
+ }catch(e){storageWarning='Local saving is unavailable. Use Save Workspace to preserve holds and notes.'}
+}
+function saveLocal(){try{localStorage.setItem(STORE,JSON.stringify(state));storageWarning=''}catch(e){storageWarning='Local saving is unavailable in this preview. Export a backup before closing.'}}
+function meta(w){return state.waveMeta[w]||{status:'Active',note:''}}
+
+const isIC=v=>String(v??'').trim().toUpperCase()==='IC';
+function orderMeta(o){return state.orderMeta?.[sourceKey(o)]||{status:'Active'}}
+let icSourceRows=null,icSourceWaves=new Set();
+function sourceWaveIC(w){if(icSourceRows!==state.orders){icSourceRows=state.orders;icSourceWaves=new Set(state.orders.filter(o=>isIC(o.waveControlStatus)).map(o=>waveNum(o.wave)))}return icSourceWaves.has(waveNum(w))}
+function waveIC(w){return isIC(meta(w).status)||sourceWaveIC(w)}
+function sourceOrderIC(o){return [o.orderControlStatus,o.orderStatus,o.twlStatus].some(isIC)}
+function icReason(o){
+ if(waveIC(o.wave))return sourceWaveIC(o.wave)?'Wave IC in imported source':'Wave control status IC';
+ if(isIC(orderMeta(o).status))return 'Order control status IC';
+ if(sourceOrderIC(o))return 'Order IC in imported source';
+ return '';
+}
+function onIC(o){return Boolean(icReason(o))}
+function icOrders(){return state.orders.filter(onIC)}
+function nonICOrders(){return state.orders.filter(o=>!onIC(o))}
+function orderHoldButton(o){return `<button class="btn red" type="button" data-order-ic="${esc(sourceKey(o))}">Move to IC</button>`}
+function setOrderHold(key,hold){
+ const o=state.orders.find(x=>sourceKey(x)===key);if(!o)throw new Error('Order no longer exists in this upload.');
+ if(!hold&&sourceOrderIC(o)){notice('This order is IC in the source file. Upload its corrected TWL status to release it.');return}
+ state.orderMeta??={};state.orderMeta[key]={...orderMeta(o),status:hold?'IC':'Active',updatedAt:new Date().toISOString()};
+ saveLocal();exitPrint();render();
+ if(hold)notice('Order moved to the IC tab. All working views and zone sheets have been recalculated.');
+}
+function releaseICWave(w){
+ if(sourceWaveIC(w)){notice('This wave is IC in the source file. Upload its corrected status to release it.');return}
+ setStatus(w,'Active');
+}
+function renderIC(){
+ const held=icOrders(),by={};held.forEach(o=>(by[o.wave]??=[]).push(o));
+ $('icTabCount').textContent=held.length?`(${n(held.length)})`:'';
+ $('icSummary').textContent=`${n(held.length)} held orders in ${n(Object.keys(by).length)} waves. Not included in active totals.`;
+ const q=$('icSearch').value.trim().toLowerCase();
+ const groups=Object.entries(by).sort(([a],[b])=>waveSort(a,b));
+ $('icBody').innerHTML=groups.map(([w,all])=>{
+  const rows=all.filter(o=>!q||[w,o.order,o.suffix,o.zone,orderNote(o),meta(w).note].join(' ').toLowerCase().includes(q));
+  if(!rows.length)return '';
+  const whole=waveIC(w),release=whole&&isIC(meta(w).status)&&!sourceWaveIC(w);
+  return `<article class="panel ic-wave-panel" data-ic-wave="${esc(w)}"><h2>Wave ${esc(w)} — ${whole?'Whole wave on IC':'Individual order holds'}</h2><div class="toolbar">${release?`<button class="btn primary" data-release-ic-wave="${esc(w)}">Release wave from IC</button>`:''}${waveNoteButton(w)}<span class="small">${esc(meta(w).note||'')}</span></div><div class="tablewrap"><table><thead><tr><th>Order / Suffix</th><th>Custom Data 1</th><th>Order Status</th><th>TWL Status</th><th>Why IC</th><th>Notes</th><th>Release</th></tr></thead><tbody>${rows.map(o=>`<tr class="${isMultiOrder(o)?'multi-row':''}" data-ic-order="${esc(sourceKey(o))}"><td><b>${esc(orderLabel(o))}</b></td><td>${esc(o.zone)}</td><td>${esc(o.orderStatus)}</td><td>${esc(o.twlStatus)}</td><td>${esc(icReason(o))}</td><td>${orderNoteButton(o)}${orderNote(o)?`<div class="proof-note">${esc(orderNote(o))}</div>`:''}</td><td>${isIC(orderMeta(o).status)&&!sourceOrderIC(o)?`<button class="btn" data-release-ic-order="${esc(sourceKey(o))}">${whole?'Clear order hold (wave stays IC)':'Release order from IC'}</button>`:whole?'Release the wave hold above':'Source IC — updated export needed'}</td></tr>`).join('')}</tbody></table></div></article>`;
+ }).join('')||'<div class="panel empty-state">No IC holds match this view.</div>';
+}
+
+function issue(o,includeArchive=true){
+ if(onIC(o))return "IC hold — visible only in IC";
+ const w=waveNum(o.wave),s=String(o.orderStatus||'').trim().toLowerCase().replace(/[ _-]+/g,' '),code=String(o.twlStatus||'').trim().toUpperCase();
+ if(!/^\d+$/.test(w)||/^0+$/.test(w))return 'No valid wave';
+ if(!String(o.order||'').trim())return 'Missing order number';
+ if(/^[WT]/i.test(String(o.order||'').trim()))return 'W/T order excluded';
+ if(['picked','packed','complete','completed'].includes(s)||['C','COMPLETE','COMPLETED','PICKED','PACKED'].includes(code))return code==='C'?'TWL C — complete':`Status excluded: ${o.orderStatus||code}`;
+ if(!['open','in pick','inpick'].includes(s)&&!['O','I'].includes(code))return 'Unrecognized status — review source';
+ if(!Number.isInteger(Number(o.lines))||Number(o.lines)<1)return 'Invalid order line count — review source';
+ if(includeArchive&&(state.archive[w]||meta(w).status==='Complete'))return 'Control status Complete — archived';
+ return '';
+}
+function activeOrder(o){return !issue(o)}
+function activeOrders(){return state.orders.filter(activeOrder)}
+function statusSummary(rows){const c=new Map();for(const o of rows){const s=o.orderStatus||o.twlStatus||'Unknown';c.set(s,(c.get(s)||0)+1)}return [...c].map(([s,v])=>`${s}: ${v}`).join(' • ')}
+function aggregate(){
+ const out={};
+ for(const o of activeOrders()){
+  const w=waveNum(o.wave);let g=out[w];if(!g)g=out[w]={wave:w,rows:[],orders:0,lines:0,singles:0,multis:0,isMulti:false,isIntl:false,zoneList:[]};
+  g.rows.push(o);g.orders++;g.lines+=Number(o.lines);isMultiOrder(o)?g.multis++:g.singles++;g.isMulti=g.multis>0;g.isIntl=g.isIntl||isIntl(o);
+ }
+ for(const g of Object.values(out)){g.zoneList=[...new Set(g.rows.flatMap(zonesOf))].sort(zoneSort);g.twl=statusSummary(g.rows);g.type=g.singles&&g.multis?'Mixed':g.isMulti?'Multi-Line':'Single-Line'}
+ return out;
+}
+// A zone entry can only be constructed by an eligible source order that names that exact zone.
+// Order classification, not another order's wave-level flag, determines Single vs Multi.
+function zoneData(){
+ const out={},totals=aggregate();
+ for(const o of activeOrders())for(const z of zonesOf(o)){
+  if(!out[z])out[z]={single:{},multi:{},intlSingle:{},intlMulti:{}};
+  const k=isIntl(o)?(isMultiOrder(o)?'intlMulti':'intlSingle'):(isMultiOrder(o)?'multi':'single');
+  const w=waveNum(o.wave);let g=out[z][k][w];
+  if(!g)g=out[z][k][w]={wave:w,zone:z,kind:k,rows:[],ordersInZone:0,picks:0,totalOrders:totals[w].orders,isMulti:isMultiOrder(o),isIntl:isIntl(o)};
+  g.rows.push(o);g.ordersInZone++;if(!isMultiOrder(o))g.picks+=Number(o.lines);
+ }
+ for(const d of Object.values(out))for(const k of Object.keys(d))for(const g of Object.values(d[k]))g.status=statusSummary(g.rows);
+ return out;
+}
+const sortedEntries=map=>Object.values(map||{}).sort((a,b)=>waveSort(a.wave,b.wave));
+function displayDate(v){if(!v)return 'not available';const d=new Date(v);return Number.isNaN(+d)?String(v):d.toLocaleString()}
+function sourceText(){
+ if(!state.source)return 'No order drop loaded';
+ const s=state.source;
+ const provenance=s.kind==='preloaded'?'last chat upload '+displayDate(s.uploadedAt):s.kind==='reference'?'original reference snapshot':'uploaded '+displayDate(s.importedAt);
+ return `${s.filename} • ${state.orders.length} unique order rows • ${provenance}`;
+}
+function sourceHint(){return state.source?.kind==='preloaded'?'UPLOAD YOUR CURRENT ORDER DROP — browser-local data only':state.source?.kind==='reference'?'REFERENCE SNAPSHOT — not current live TWL data':'FILE SNAPSHOT — not a live TWL connection'}
+function notice(message){$('appError').hidden=!message;$('appError').textContent=message||''}
+function showPage(id){if(!$(id))return;document.querySelectorAll('.page,.tab').forEach(e=>e.classList.remove('active'));$(id).classList.add('active');document.querySelector(`.tab[data-page="${id}"]`)?.classList.add('active')}
+function waveButton(w){return `<button class="wavebtn" data-wave="${esc(w)}" type="button">${esc(w)}</button>`}
+function statusSelect(w){return `<select class="ctrlStatus" data-wave="${esc(w)}" aria-label="Control status for wave ${esc(w)}">${['Active','In Progress','IC','Complete'].map(s=>`<option${meta(w).status===s?' selected':''}>${s}</option>`).join('')}</select>`}
+function waveNoteButton(w){return `<button class="btn noteBtn" data-wave="${esc(w)}">${meta(w).note?'View note':'＋ Note'}</button>`}
+function orderNote(o){return state.orderNotes[sourceKey(o)]||''}
+function orderNoteButton(o){return `<button class="btn" data-order-note="${esc(sourceKey(o))}">${orderNote(o)?'View note':'＋ Note'}</button>`}
+function proofButton(g){return `<button class="btn proofbtn" data-proof="1" data-zone="${esc(g.zone)}" data-wave="${esc(g.wave)}" data-kind="${g.kind}" aria-label="Why is wave ${esc(g.wave)} on zone ${esc(g.zone)}?">Why here?</button>`}
+function render(){
+ const ag=aggregate(),waves=sortedEntries(ag),ao=activeOrders(),singles=new Set(ao.filter(o=>!isMultiOrder(o)&&!isIntl(o)).map(o=>o.wave)),multis=new Set(ao.filter(o=>isMultiOrder(o)&&!isIntl(o)).map(o=>o.wave)),intls=waves.filter(g=>g.isIntl);
+ $('lastImport').textContent=state.source?state.source.filename:'Upload a current drop to begin';
+ $('sourceBanner').innerHTML=state.source?`<span class="source-label">${sourceHint()}</span><br><b>${esc(sourceText())}</b><br>${n(ao.length)} active order rows; ${n(state.orders.length-ao.length)} excluded. IC work is excluded from every working view. Each successful upload replaces the prior waves, notes, IC holds, control statuses and archive.${state.source.duplicates?` ${n(state.source.duplicates)} duplicate rows removed.`:''}${storageWarning?'<br>'+esc(storageWarning):''}`:`<span class="source-label">UPLOAD YOUR CURRENT ORDER DROP</span><br>Use <b>Upload Order Drop CSV</b> for a new file, or <b>Restore Workspace</b> for a saved workspace including IC holds.${storageWarning?'<br>'+esc(storageWarning):''}`;
+ $('sourceBanner').innerHTML+=`<details class="source-details"><summary>Show source file and matched columns</summary><div>${esc(state.source?.filename||'No file')}<br>File fingerprint: ${esc(state.source?.sha256?.slice(0,16)||'not recorded')}<br>${Object.entries(state.source?.headerMap||{}).filter(([,v])=>v).map(([k,v])=>`${esc(k)} ← ${esc(v.header)} (column ${v.column})`).join('<br>')}</div></details>`;
+  const kpis=[['waves','Active Waves',waves.length],['orders','Active Orders',ao.length],['lines','Lines / Picks',ao.reduce((a,o)=>a+Number(o.lines),0)],['single','Single-Line Waves',singles.size],['multi','Multi-Line Waves',multis.size],['intl','International Waves',intls.length],['archive','Archived Waves',Object.keys(state.archive).filter(w=>!waveIC(w)).length]];
+ $('kpis').innerHTML=kpis.map(([k,l,v])=>`<button class="kpi clickable" data-kpi="${k}"><div class="n">${n(v)}</div><div class="l">${l}</div></button>`).join('');
+ renderWaves(waves);renderMultis(ao);renderIntl(intls);renderZones();renderRollingDashboard();renderIC();renderArchive();renderRaw();
+ if(detailTarget)renderDetail();
+}
+function renderWaves(waves=sortedEntries(aggregate())){
+ const q=$('search').value.trim().toLowerCase();
+ $('wavesBody').innerHTML=waves.filter(g=>!q||[g.wave,g.zoneList.join(','),g.twl,meta(g.wave).note].join(' ').toLowerCase().includes(q)).map(g=>`<tr class="${g.isMulti?'multi-row':''}"><td>${waveButton(g.wave)}</td><td>${g.isMulti?`<span class="multi-tag">${g.type==='Mixed'?'MIXED — CONTAINS MULTIS':'MULTI'}</span>`:'Single-Line'}${g.isIntl?' • INTERNATIONAL':''}</td><td>${n(g.orders)}</td><td>${n(g.lines)}</td><td>${g.zoneList.map(z=>`<span class="chip">${esc(z)}</span>`).join('')}</td><td>${esc(g.twl)}</td><td>${statusSelect(g.wave)}</td><td>${waveNoteButton(g.wave)}${meta(g.wave).note?`<div class="proof-note">${esc(meta(g.wave).note)}</div>`:''}</td></tr>`).join('')||'<tr><td colspan="8" class="empty-state">No active waves. Upload the current order-drop CSV.</td></tr>';
+}
+function renderMultis(active){
+ const by={};for(const o of active.filter(o=>isMultiOrder(o)&&!isIntl(o)))(by[o.wave]??=[]).push(o);
+ $('multiBody').innerHTML=Object.entries(by).sort(([a],[b])=>waveSort(a,b)).map(([w,rows])=>`<tr class="multi-row"><td>${waveButton(w)}</td><td>${n(rows.length)}</td><td>${n(rows.reduce((s,o)=>s+Number(o.lines),0))}</td><td>${[...new Set(rows.flatMap(zonesOf))].sort(zoneSort).map(z=>`<span class="chip">${esc(z)}</span>`).join('')}</td><td>${esc(statusSummary(rows))}</td><td>${statusSelect(w)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty-state">No domestic multi-line orders. International work has its own section.</td></tr>';
+}
+function renderIntl(waves){$('intlSummary').textContent=`${waves.length} waves contain active international orders`;$('intlBody').innerHTML=waves.map(g=>{const rows=g.rows.filter(isIntl),multi=rows.some(isMultiOrder);return `<tr class="${multi?'multi-row':''}"><td>${waveButton(g.wave)}</td><td>${multi?'Contains multi-line':'Single-line'}</td><td>${n(rows.length)}</td><td>${n(rows.reduce((s,o)=>s+Number(o.lines),0))}</td><td>${esc([...new Set(rows.flatMap(zonesOf))].sort(zoneSort).join(', '))}</td><td>${esc(statusSummary(rows))}</td></tr>`}).join('')||'<tr><td colspan="6" class="empty-state">No active international work.</td></tr>'}
+function renderZones(){
+ const zones=Object.keys(zoneData()).sort(zoneSort),sel=$('zoneSelect'),prev=sel.value;
+ sel.innerHTML=zones.length?zones.map(z=>`<option value="${esc(z)}">${esc(z)}</option>`).join(''):'<option value="">Upload a current drop</option>';
+ if(zones.includes(prev))sel.value=prev;sel.disabled=!zones.length;$('printZone').disabled=!zones.length;$('printAllZones').disabled=!zones.length;$('printZoneMulti').disabled=!zones.length;$('printAllMultiZones').disabled=!zones.length;
+ renderSelectedZone();
+}
+function zoneRowsHTML(entries,kind,print=false){
+ return entries.map(g=>`<tr data-sheet-wave="${esc(g.wave)}" data-sheet-kind="${esc(g.kind)}"><td>${print?`<b>${esc(g.wave)}</b>`:waveButton(g.wave)}</td><td>${n(g.picks)}</td><td>${n(g.ordersInZone)}</td><td>${esc(g.status)}</td>${print?'':`<td>${proofButton(g)}</td>`}</tr>`).join('')||`<tr><td colspan="${print?4:5}" class="empty-state">No eligible single-line orders.</td></tr>`;
+}
+function multiNumbersHTML(entries,print=false){
+ return entries.map(g=>print?`<span class="multi-number" data-sheet-wave="${esc(g.wave)}" data-sheet-kind="${esc(g.kind)}">${esc(g.wave)}</span>`:`<button type="button" class="multi-number" data-proof="1" data-zone="${esc(g.zone)}" data-wave="${esc(g.wave)}" data-kind="${g.kind}" data-sheet-wave="${esc(g.wave)}" data-sheet-kind="${g.kind}" title="View matching source orders for this wave in Zone ${esc(g.zone)}">${esc(g.wave)}</button>`).join('')||'<div class="empty-state">No eligible multi-line waves.</div>';
+}
+function singleTable(rows,print=false){
+ return `<table><thead><tr><th>Wave</th><th>Picks</th><th>Orders</th><th>Status</th>${print?'':'<th>Source</th>'}</tr></thead><tbody>${zoneRowsHTML(rows,'single',print)}</tbody></table>`;
+}
+function getZoneSections(z){const d=zoneData()[z]||{single:{},multi:{},intlSingle:{},intlMulti:{}};return {singles:sortedEntries(d.single),multis:sortedEntries(d.multi),intls:[...sortedEntries(d.intlSingle),...sortedEntries(d.intlMulti)].sort((a,b)=>waveSort(a.wave,b.wave)||Number(a.isMulti)-Number(b.isMulti))}}
+let rollingIndex=0,rollingPaused=false,rollingStarted=Date.now(),rollingInterval=null;
+function assignedPicker(z){return PICKERS[String(z||'').toUpperCase()]||'Unassigned'}
+function rollingZoneStats(z){
+ const {singles,multis,intls}=getZoneSections(z),iss=intls.filter(g=>!g.isMulti),ims=intls.filter(g=>g.isMulti),all=[...singles,...multis,...intls];
+ const orders=[...new Set(all.flatMap(g=>g.rows||[]).map(o=>sourceKey(o)))];
+ return {singleWaves:new Set([...singles,...iss].map(g=>g.wave)).size,multiWaves:new Set([...multis,...ims].map(g=>g.wave)).size,intlWaves:new Set(intls.map(g=>g.wave)).size,orders:orders.length,picks:[...singles,...iss].reduce((s,g)=>s+Number(g.picks||0),0),waves:[...new Map(all.map(g=>[String(g.wave),g])).values()].sort((a,b)=>waveSort(a.wave,b.wave))};
+}
+function renderRollingDashboard(force=false){
+ const zd=zoneData(),zones=ROLL_ZONES.filter(z=>zd[z]);
+ if(!zones.length){$('rollingZone').textContent='NO ACTIVE ASSIGNED ZONES';$('rollingPicker').textContent='Upload the current order drop';$('rollingKpis').innerHTML='';$('rollingWaves').innerHTML='';return}
+ if(rollingIndex>=zones.length)rollingIndex=0;const z=zones[rollingIndex],st=rollingZoneStats(z);
+ $('rollingZone').textContent=`ZONE ${z}`;$('rollingPicker').textContent=`PICKER: ${assignedPicker(z)}`;
+ $('rollingKpis').innerHTML=[['Orders',st.orders],['Single Waves',st.singleWaves],['Multi Waves',st.multiWaves],['International',st.intlWaves],['Single Picks',st.picks]].map(([l,v])=>`<div class="rolling-kpi"><div class="n">${n(v)}</div><div class="l">${l}</div></div>`).join('');
+ $('rollingWaves').innerHTML=st.waves.map(g=>`<span class="rolling-wavechip ${g.isMulti?'multi':''} ${g.isIntl?'intl':''}">${esc(g.wave)}${g.isMulti?' • MULTI':''}${g.isIntl?' • INTL':''}</span>`).join('')||'<span class="small">No active waves.</span>';
+ if(force)rollingStarted=Date.now();
+}
+function tickRolling(){
+ if(!$('rollingClock'))return;$('rollingClock').textContent=new Date().toLocaleTimeString();
+ if(rollingPaused){$('rollingProgress').style.width='0%';return}
+ const elapsed=Date.now()-rollingStarted;$('rollingProgress').style.width=`${Math.min(100,elapsed/80)}%`;
+ if(elapsed>=8000){const zones=ROLL_ZONES.filter(z=>zoneData()[z]);if(zones.length)rollingIndex=(rollingIndex+1)%zones.length;rollingStarted=Date.now();renderRollingDashboard()}
+}
+function multiOrderRows(entries){
+ const rows=[];for(const g of entries)for(const o of (g.rows||[]))rows.push({wave:g.wave,order:orderLabel(o),lines:Number(o.lines),status:o.orderStatus||o.twlStatus||'—'});
+ return rows.sort((a,b)=>waveSort(a.wave,b.wave)||String(a.order).localeCompare(String(b.order)));
+}
+function multiOrderTable(entries){
+ const rows=multiOrderRows(entries);let last='';
+ return `<table class="multi-print-table"><thead><tr><th>Wave</th><th>Order</th><th>Lines</th><th>Status</th></tr></thead><tbody>${rows.map(r=>{const w=String(r.wave)===last?'':r.wave;last=String(r.wave);return `<tr class="multi-row"><td>${esc(w)}</td><td>${esc(r.order)}</td><td>${n(r.lines)}</td><td>${esc(r.status)}</td></tr>`}).join('')||'<tr><td colspan="4" class="empty-state">No eligible multi-line orders in this zone.</td></tr>'}</tbody></table>`;
+}
+function multiZoneSheet(z){
+ const {multis,intls}=getZoneSections(z),ims=intls.filter(g=>g.isMulti),source=esc(state.source?.filename||'No file'),fingerprint=esc(state.source?.sha256?.slice(0,12)||'');
+ return `<section class="print-sheet" data-print-zone="${esc(z)}"><div class="print-head"><div><h1>ZONE ${esc(z)} MULTI-LINE PICK SHEET</h1><b class="picker-label">PICKER: ${esc(assignedPicker(z))}</b> <span class="multi-only-badge">MULTI ONLY</span></div><div class="print-source">Source: ${source}${fingerprint?'<br>File ID: '+fingerprint:''}<br>Prepared ${esc(new Date().toLocaleString())}</div></div><div class="print-summary">Only eligible O-orders with more than one line for Zone ${esc(z)}. T/W orders, IC holds and completed work remain excluded.</div><h2 class="multi-label">DOMESTIC MULTI-LINE</h2>${multiOrderTable(multis)}${ims.length?`<div class="intl-print"><h2>INTERNATIONAL MULTI-LINE — SEPARATE</h2>${multiOrderTable(ims)}</div>`:''}<div class="print-foot">ZONE ${esc(z)} • MULTI-LINE ONLY • ${esc(assignedPicker(z))}</div></section>`;
+}
+function renderSelectedZone(){
+ const z=$('zoneSelect').value,{singles,multis,intls}=getZoneSections(z);
+ const ims=intls.filter(g=>g.isMulti),iss=intls.filter(g=>!g.isMulti);
+ $('zoneSummary').innerHTML=[['Single Waves',new Set([...singles,...iss].map(g=>g.wave)).size],['Single Picks',[...singles,...iss].reduce((s,g)=>s+g.picks,0)],['Multi Waves',new Set([...multis,...ims].map(g=>g.wave)).size],['International Waves',new Set(intls.map(g=>g.wave)).size]].map(([l,v])=>`<div class="kpi"><div class="n">${n(v)}</div><div class="l">${l}</div></div>`).join('');
+ $('singleTitle').textContent=`Zone ${z||'—'} — SINGLE-LINE`;
+ $('multiTitle').textContent=`Zone ${z||'—'} — MULTI-LINE: WAVE NUMBERS ONLY`;
+ $('zoneIntlTitle').textContent=`Zone ${z||'—'} — INTERNATIONAL (Separate)`;
+ $('zoneSingle').innerHTML=zoneRowsHTML(singles,'single');
+ $('zoneMulti').innerHTML=multiNumbersHTML(multis);
+ $('zoneIntl').innerHTML=`${iss.length?'<h3>International single-line</h3><div class="tablewrap">'+singleTable(iss)+'</div>':''}${ims.length?'<h3>International multi-line — wave numbers only</h3><div class="multi-numbers">'+multiNumbersHTML(ims)+'</div>':''}${!intls.length?'<div class="empty-state">No eligible international work in this zone.</div>':''}`;
+}
+function zoneSheet(z){
+ const {singles,multis,intls}=getZoneSections(z),iss=intls.filter(g=>!g.isMulti),ims=intls.filter(g=>g.isMulti);
+ const source=esc(state.source?.filename||'No file'),fingerprint=esc(state.source?.sha256?.slice(0,12)||'');
+ return `<section class="print-sheet" data-print-zone="${esc(z)}"><div class="print-head"><div><h1>ZONE ${esc(z)} PICK SHEET</h1><b>FOCUS. PICK. FINISH.</b><br><span class="picker-label">PICKER: ${esc(assignedPicker(z))}</span></div><div class="print-source">Source: ${source}${fingerprint?'<br>File ID: '+fingerprint:''}<br>Prepared ${esc(new Date().toLocaleString())}</div></div><h2>SINGLE-LINE</h2>${singleTable(singles,true)}<h2 class="multi-label">MULTI-LINE</h2><div class="multi-numbers">${multiNumbersHTML(multis,true)}</div>${intls.length?`<div class="intl-print"><h2>INTERNATIONAL — SEPARATE</h2>${iss.length?'<h3>Single-line</h3>'+singleTable(iss,true):''}${ims.length?'<h3 class="multi-label">Multi-line</h3><div class="multi-numbers">'+multiNumbersHTML(ims,true)+'</div>':''}</div>`:''}<div class="print-foot">ZONE ${esc(z)} • PICK ONLY THE WAVES LISTED FOR THIS ZONE</div></section>`;
+}
+function proofRows(zone,wave,kind){return zoneData()[zone]?.[kind]?.[wave]?.rows||[]}
+function openDetail(w){detailTarget={wave:waveNum(w)};renderDetail();if(detailTarget)$('detailModal').classList.add('show')}
+function openProof(z,w,k){detailTarget={zone:z,wave:waveNum(w),kind:k};renderDetail();if(detailTarget)$('detailModal').classList.add('show')}
+function renderDetail(){
+ if(!detailTarget)return;const t=detailTarget,all=nonICOrders().filter(o=>waveNum(o.wave)===t.wave),rows=t.zone?proofRows(t.zone,t.wave,t.kind):all;
+ if(!all.length){detailTarget=null;$('detailModal').classList.remove('show');$('detailBody').innerHTML='';$('detailTitle').textContent='';$('detailContext').innerHTML='';$('detailSummary').innerHTML='';return}
+ $('detailTitle').textContent=t.zone?`Why wave ${t.wave} is on Zone ${t.zone}`:`Wave ${t.wave} — source orders (IC hidden)`;
+ $('detailSub').textContent=sourceText();
+ $('detailSummary').innerHTML=[['Shown Orders',rows.length],['Active Orders',rows.filter(activeOrder).length],['Excluded Orders',rows.filter(o=>!activeOrder(o)).length],['Raw Source Zones',[...new Set(rows.flatMap(zonesOf))].sort(zoneSort).join(', ')||'—']].map(([l,v])=>`<div class="kpi"><div class="n" style="${typeof v==='string'?'font-size:16px':''}">${esc(v)}</div><div class="l">${l}</div></div>`).join('');
+ $('detailContext').innerHTML=t.zone?`<b>Source proof:</b> Every row below is eligible, names the exact token <b>${esc(t.zone)}</b> in Custom Data 1, and is classified from its own order line count. These are the only rows contributing to this entry. <button class="btn" data-view-all="${t.wave}">Show all orders in this wave</button>`:'Non-IC source orders are shown here, including other excluded orders. IC orders are only in the IC tab. Excluded orders do not contribute to the zone sheets. Source rows refer to CSV records, including the header and optional separator record.';
+ $('detailContext').innerHTML+=` <button class="btn red" data-wave-ic="${esc(t.wave)}">Move whole wave to IC</button>`;
+ $('detailBody').innerHTML=rows.map(o=>sourceOrderRow(o,false)).join('')||'<tr><td colspan="10" class="empty-state">No matching source orders.</td></tr>';
+}
+function sourceOrderRow(o,includeWave){const reason=issue(o);return `<tr class="${isMultiOrder(o)?'multi-row':''}"><td>${esc((o.sourceRows||[o.sourceRow]).join(', '))}</td><td class="nobr"><b>${esc(orderLabel(o))}</b></td>${includeWave?`<td>${waveNum(o.wave)?waveButton(o.wave):'—'}</td>`:''}<td>${esc(o.zone)}</td><td>${n(o.lines)}</td><td>${esc(o.orderStatus)}</td><td>${esc(o.twlStatus)}</td><td>${esc(o.route)}</td><td>${reason?`<span class="excluded">${esc(reason)}</span>`:'Eligible'}${!zonesOf(o).length?' • No zone listed':''}</td><td>${orderHoldButton(o)}</td><td>${orderNoteButton(o)}${orderNote(o)?`<div class="proof-note">${esc(orderNote(o))}</div>`:''}</td></tr>`}
+function renderRaw(){const q=$('rawSearch').value.trim().toLowerCase(),rows=(rawOnlyActive?activeOrders():nonICOrders()).filter(o=>!q||[o.order,o.suffix,o.wave,o.zone,o.orderStatus,o.twlStatus].join(' ').toLowerCase().includes(q));$('rawTitle').textContent=`${rawOnlyActive?'Active orders':'Source orders (IC hidden)'} — ${rows.length} rows`;$('rawBody').innerHTML=rows.map(o=>sourceOrderRow(o,true)).join('')||'<tr><td colspan="11" class="empty-state">No matching orders.</td></tr>'}
+function setStatus(w,s){
+ if(!['Active','In Progress','IC','Complete'].includes(s))return;
+ w=waveNum(w);const g=aggregate()[w];state.waveMeta[w]={...meta(w),status:s};
+ if(s==='Complete'){state.archive[w]={wave:w,type:g?.type||'Wave',orders:g?.orders||0,lines:g?.lines||0,completed:new Date().toISOString()}}else delete state.archive[w];
+ saveLocal();exitPrint();render();
+ if(s==='IC')notice('Wave moved to the IC tab. Its orders are removed from every working view and printout.');
+}
+function renderArchive(){
+ $('archiveBody').innerHTML=Object.entries(state.archive).filter(([w])=>!waveIC(w)).sort(([a],[b])=>waveSort(a,b)).map(([w,g])=>{
+  const rows=nonICOrders().filter(o=>o.wave===w&&!issue(o,false));
+  if(!rows.length)return '';
+  const multi=rows.some(isMultiOrder);
+  return `<tr class="${multi?'multi-row':''}"><td>${waveButton(w)}</td><td>${multi?'Contains multis':'Single-line'}</td><td>${n(rows.length)}</td><td>${n(rows.reduce((s,o)=>s+Number(o.lines),0))}</td><td>${esc(displayDate(g.completed))}</td><td><button class="btn" data-restore="${esc(w)}">Restore</button></td></tr>`;
+ }).join('')||'<tr><td colspan="6" class="empty-state">No archived non-IC waves.</td></tr>';
+}
+function openNote(kind,key){noteTarget={kind,key};$('noteTitle').textContent=kind==='wave'?`Wave ${key} Note`:'Order Note';$('noteText').value=kind==='wave'?meta(key).note||'':state.orderNotes[key]||'';$('noteModal').classList.add('show')}
+function saveNote(clear=false){if(!noteTarget)return;const v=clear?'':$('noteText').value.trim();if(noteTarget.kind==='wave')state.waveMeta[noteTarget.key]={...meta(noteTarget.key),note:v};else state.orderNotes[noteTarget.key]=v;saveLocal();$('noteModal').classList.remove('show');noteTarget=null;render()}
+function csvText(rows){return '\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n')}
+function downloadText(text,filename,mime='text/csv'){const blob=new Blob([text],{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000)}
+function auditRows(){const rows=[['Source file','Source record','Order','Suffix','Wave','Custom Data 1 (raw)','Matched zone','Order category','International','Order lines (classification evidence)','Order status','TWL status','Route']];for(const z of Object.keys(zoneData()).sort(zoneSort)){const d=zoneData()[z];for(const k of Object.keys(d))for(const g of sortedEntries(d[k]))for(const o of g.rows)rows.push([state.source?.filename,(o.sourceRows||[o.sourceRow]).join('|'),o.order,o.suffix,o.wave,o.zone,z,isMultiOrder(o)?'MULTI':'SINGLE',isIntl(o)?'YES':'NO',o.lines,o.orderStatus,o.twlStatus,o.route])}return rows}
+function parseCSV(text){
+ text=String(text).replace(/^\uFEFF/,'');let out=[],row=[],f='',quoted=false;
+ for(let i=0;i<text.length;i++){const c=text[i];if(quoted){if(c==='"'&&text[i+1]==='"'){f+='"';i++}else if(c==='"')quoted=false;else f+=c}else if(c==='"'){if(f.trim())throw new Error('Malformed quotation in CSV');quoted=true}else if(c===','){row.push(f);f=''}else if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;row.push(f);out.push(row);row=[];f=''}else f+=c}
+ if(quoted)throw new Error('CSV ends inside a quoted field. No data was replaced.');if(f||row.length){row.push(f);out.push(row)}return out;
+}
+function parseImport(text){
+ const data=parseCSV(text),norm=s=>String(s||'').trim().toLowerCase().replace(/[^a-z0-9]/g,'');
+ const hi=data.findIndex((r,i)=>i<20&&r.some(v=>['order','orderno','ordernumber'].includes(norm(v)))&&r.some(v=>['wave','wavenumber'].includes(norm(v)))&&r.some(v=>['customdata1','zone','zoneletter'].includes(norm(v))));
+ if(hi<0)throw new Error('Required order, wave and Custom Data 1 headers were not found. Your previous data was kept.');
+ const h=data[hi],positions={};h.forEach((s,i)=>(positions[norm(s)]??=[]).push(i));
+ const column=(names,required=false)=>{for(const name of names){const xs=positions[norm(name)];if(xs){if(xs.length>1&&norm(name)!=='linecount')throw new Error('Ambiguous duplicate column: '+name);return xs[0]}}if(required)throw new Error('Missing required column: '+names[0]);return -1};
+ const cols={order:column(['Order #','Order Number','Order No','Order'],true),suffix:column(['Order Suffix','Order Suff']),wave:column(['Wave','Wave #','Wave Number'],true),zone:column(['Custom Data 1','Custom Data1','Zone','Zone Letter'],true),lines:column(['Line Count','Lines','Pick Lines'],true),orderStatus:column(['Order Status']),twlStatus:column(['Status','TWL Status']),route:column(['Route','Route Code']),international:column(['International','International Order','Intl']),date:column(['Order Date']),orderType:column(['Order Type']),orderControlStatus:column(['Order Control Status','Control Status']),waveControlStatus:column(['Wave Control Status'])};
+ if(cols.orderStatus<0&&cols.twlStatus<0)throw new Error('A status column is required to exclude completed work.');
+ const lineCandidates=positions.linecount||[cols.lines];const nonempty=lineCandidates.filter(i=>data.slice(hi+1).some(r=>String(r[i]??'').trim()));
+ if(nonempty.length>1){const conflicts=data.slice(hi+1).some(r=>{const vs=nonempty.map(i=>String(r[i]??'').trim()).filter(Boolean);return new Set(vs).size>1});if(conflicts)throw new Error('Conflicting Line Count columns. Remove the duplicate or export only the order Line Count. No data was replaced.');}if(nonempty.length===1)cols.lines=nonempty[0];
+ const orders=[],seen=new Map();let duplicates=0;
+ data.slice(hi+1).forEach((r,j)=>{if(r.every(v=>!v.trim()))return;if(r.length<h.length||r.slice(h.length).some(v=>v.trim()))throw new Error(`CSV record ${j+hi+2} does not align with the header. No data was replaced.`);
+ const o={};for(const [key,i] of Object.entries(cols))o[key]=i<0?'':String(r[i]??'').trim();
+ o.wave=waveNum(o.wave);o.suffix=o.suffix||'';o.lines=o.lines===''?0:Number(o.lines.replace(/,/g,''));o.sourceRow=j+hi+2;o.sourceRows=[o.sourceRow];
+ const key=sourceKey(o),prior=seen.get(key);if(prior){const compare=x=>JSON.stringify([x.order.toUpperCase(),x.suffix,x.wave,x.zone,x.lines,x.orderStatus,x.twlStatus,x.route,x.international,x.orderControlStatus,x.waveControlStatus]);if(compare(o)!==compare(prior))throw new Error(`Conflicting duplicate order ${orderLabel(o)} in wave ${o.wave}. No data was replaced.`);prior.sourceRows.push(o.sourceRow);duplicates++;return}seen.set(key,o);orders.push(o);
+ });
+ if(!orders.length)throw new Error('No order rows found. Your previous data was kept.');
+ return {orders,duplicates,headerMap:Object.fromEntries(Object.entries(cols).map(([k,i])=>[k,i>=0?{column:i+1,header:h[i]}:null]))};
+}
+async function uploadFile(file){
+ const bytes=await file.arrayBuffer(),text=new TextDecoder('utf-8').decode(bytes),parsed=parseImport(text);
+ let sha256='';try{sha256=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){}
+ const fresh={...initialState(),orders:parsed.orders,source:{filename:file.name,kind:'upload',importedAt:new Date().toISOString(),duplicates:parsed.duplicates,headerMap:parsed.headerMap,sha256},lastImport:file.name};
+ state=fresh;rawOnlyActive=false;detailTarget=null;noteTarget=null;
+ $('detailModal').classList.remove('show');$('noteModal').classList.remove('show');$('search').value='';$('rawSearch').value='';$('icSearch').value='';
+ exitPrint();saveLocal();notice('');render();showPage('zones');
+}
+function saveWorkspace(){downloadText(JSON.stringify({...state,schema:VERSION},null,2),'TWL_Workspace_with_IC.json','application/json')}
+async function restoreWorkspace(file){
+ const saved=JSON.parse(await file.text());
+ if(!saved||!['5.4',VERSION].includes(saved.schema)||!Array.isArray(saved.orders)||!saved.source||saved.orders.some(o=>!o||typeof o!=='object'||typeof o.order!=='string'||!('wave'in o)||!('zone'in o)))throw new Error('This is not a supported TWL saved workspace. Your current data was kept.');
+ state={...initialState(),...saved,schema:VERSION,orderMeta:saved.orderMeta||{}};
+ detailTarget=null;noteTarget=null;rawOnlyActive=false;exitPrint();$('detailModal').classList.remove('show');$('noteModal').classList.remove('show');saveLocal();notice('');render();showPage('zones');
+}
+
+function loadReference(){notice('Upload the required order-drop file or restore its saved workspace. The original embedded export is not reloaded over your current data.')}
+let currentPrintHTML='',currentPrintZones=[],currentPrintMode='zone';
+function printableDocument(content){return '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Zone Pick Sheets</title><style>'+document.querySelector('style').textContent+'\n.top,.tabs,.wrap,.modal,.printbar{display:none!important}body{background:white;color:black}.print-stage{display:block!important;padding:0!important;background:white!important}@media print{.printbar{display:none!important}}</style></head><body class="print-preview"><div class="print-stage">'+content+'</div></body></html>'}
+function beginPrint(label,html,mode='zone'){
+ currentPrintMode=mode;currentPrintHTML=html;
+ const holder=document.createElement('div');holder.innerHTML=html;currentPrintZones=[...holder.querySelectorAll('[data-print-zone]')].map(e=>e.dataset.printZone);
+ $('printStage').innerHTML=`<div class="printbar"><div><b>${esc(label)}</b><div class="small" style="color:#ddd">${mode==='multi'?'Separate multi-line pick sheets by zone.':'One normal pick sheet per zone; international stays separated.'} Use Save Printable HTML if browser printing is unavailable.</div></div><div class="group"><button class="btn primary" id="printNow">PRINT NOW</button><button class="btn" id="savePrintable">Save Printable HTML</button><button class="btn" id="printBack">Back</button></div></div>${html}`;
+ document.body.classList.add('print-preview');window.scrollTo(0,0);
+}
+function refreshPrint(){
+ if(!currentPrintZones.length)return;
+ const zones=currentPrintZones.filter(z=>zoneData()[z]);const fn=currentPrintMode==='multi'?multiZoneSheet:zoneSheet;beginPrint(zones.length===1?`Zone ${zones[0]} ${currentPrintMode==='multi'?'Multi-Line ':''}Pick Sheet`:`${zones.length} Zone ${currentPrintMode==='multi'?'Multi-Line ':''}Pick Sheets`,zones.map(fn).join(''),currentPrintMode);
+}
+function exitPrint(){document.body.classList.remove('print-preview');$('printStage').innerHTML=''}
+// One delegated event path also handles rows produced after a search, upload or status change.
+document.addEventListener('click',e=>{
+ const el=e.target.closest('button');if(!el)return;
+ try{
+  if(el.dataset.orderIc){setOrderHold(el.dataset.orderIc,true);return}
+   if(el.dataset.waveIc){setStatus(el.dataset.waveIc,'IC');return}
+   if(el.dataset.releaseIcWave){releaseICWave(el.dataset.releaseIcWave);return}
+   if(el.dataset.releaseIcOrder){setOrderHold(el.dataset.releaseIcOrder,false);return}
+   if(el.dataset.proof){openProof(el.dataset.zone,el.dataset.wave,el.dataset.kind);return}
+  if(el.dataset.viewAll){openDetail(el.dataset.viewAll);return}
+  if(el.dataset.orderNote){openNote('order',el.dataset.orderNote);return}
+  if(el.classList.contains('noteBtn')){openNote('wave',el.dataset.wave);return}
+  if(el.classList.contains('wavebtn')){openDetail(el.dataset.wave);return}
+  if(el.dataset.restore){setStatus(el.dataset.restore,'Active');return}
+  if(el.dataset.page){if(el.dataset.page==='raw'){rawOnlyActive=false;renderRaw()}showPage(el.dataset.page);return}
+  if(el.dataset.kpi){const k=el.dataset.kpi;if(k==='single')showPage('zones');else if(k==='multi')showPage('multis');else if(k==='intl')showPage('international');else if(k==='archive')showPage('archive');else if(k==='orders'||k==='lines'){rawOnlyActive=true;$('rawSearch').value='';renderRaw();showPage('raw')}else{$('search').value='';renderWaves();showPage('dashboard');$('wavesBody').scrollIntoView({block:'start'})}return}
+  switch(el.id){
+   case 'rollingToggle':rollingPaused=!rollingPaused;el.textContent=rollingPaused?'Resume Rotation':'Pause Rotation';rollingStarted=Date.now();renderRollingDashboard(true);break;
+   case 'rollingFull':{const b=$('rollingBoard');if(document.fullscreenElement)document.exitFullscreen?.();else b.requestFullscreen?.();break}
+   case 'goZonePrint':showPage('zones');break;
+   case 'loadReference':loadReference();break;
+    case 'saveWorkspace':saveWorkspace();break;
+    case 'exportIC':downloadText(csvText([['Wave','Order','Suffix','Custom Data 1','Order Status','TWL Status','Why IC','Wave Note','Order Note'],...icOrders().map(o=>[o.wave,o.order,o.suffix,o.zone,o.orderStatus,o.twlStatus,icReason(o),meta(o.wave).note,orderNote(o)])]),'TWL_IC_Only.csv');break;
+   case 'detailClose':detailTarget=null;$('detailModal').classList.remove('show');break;
+   case 'noteClose':noteTarget=null;$('noteModal').classList.remove('show');break;
+   case 'noteSave':saveNote();break;
+   case 'noteClear':saveNote(true);break;
+   case 'rawAll':rawOnlyActive=false;renderRaw();break;
+   case 'rawActive':rawOnlyActive=true;renderRaw();break;
+   case 'printZone':if($('zoneSelect').value)beginPrint(`Zone ${$('zoneSelect').value} Pick Sheet`,zoneSheet($('zoneSelect').value),'zone');break;
+   case 'printZoneMulti':if($('zoneSelect').value)beginPrint(`Zone ${$('zoneSelect').value} Multi-Line Pick Sheet`,multiZoneSheet($('zoneSelect').value),'multi');break;
+   case 'printAllZones':{const zs=Object.keys(zoneData()).sort(zoneSort);if(zs.length)beginPrint(`${zs.length} Zone Pick Sheets`,zs.map(zoneSheet).join(''),'zone');break}
+   case 'printAllMultiZones':
+   case 'printAllMultiZones2':{const zs=ROLL_ZONES.filter(z=>zoneData()[z]&&multiOrderRows([...getZoneSections(z).multis,...getZoneSections(z).intls.filter(g=>g.isMulti)]).length);if(zs.length)beginPrint(`${zs.length} Zone Multi-Line Pick Sheets`,zs.map(multiZoneSheet).join(''),'multi');else notice('No eligible multi-line orders in assigned zones.');break}
+   case 'printBack':exitPrint();break;
+   case 'printNow':refreshPrint();try{window.print()}catch(err){notice('Printing is blocked in this preview. Save Printable HTML and open it outside the preview.')}break;
+   case 'savePrintable':refreshPrint();downloadText(printableDocument(currentPrintHTML),currentPrintMode==='multi'?'Zone_MULTI_Pick_Sheets.html':'Zone_Pick_Sheets.html','text/html');break;
+   case 'exportProof':downloadText(csvText(auditRows()),'Zone_Order_Source_Audit.csv');break;
+   case 'backupBtn':downloadText(csvText([['Source file','Wave','Type','Active orders','Total lines','Zones','Source statuses','Control status','Wave note'],...sortedEntries(aggregate()).map(g=>[state.source?.filename,g.wave,g.type,g.orders,g.lines,g.zoneList.join(','),g.twl,meta(g.wave).status,meta(g.wave).note])]),'Wave_Control_Center_Backup.csv');break;
+  }
+ }catch(err){console.error(err);notice('Action failed: '+err.message)}
+});
+document.addEventListener('change',e=>{if(e.target.classList.contains('ctrlStatus'))setStatus(e.target.dataset.wave,e.target.value)});
+$('icSearch').addEventListener('input',renderIC);
+$('restoreWorkspace').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{await restoreWorkspace(f)}catch(err){notice(err.message)}e.target.value=''});
+$('zoneSelect').addEventListener('change',renderSelectedZone);$('search').addEventListener('input',()=>renderWaves());$('rawSearch').addEventListener('input',renderRaw);
+$('upload').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{await uploadFile(file)}catch(err){notice(err.message)}e.target.value=''});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){detailTarget=null;noteTarget=null;$('detailModal').classList.remove('show');$('noteModal').classList.remove('show')}});
+window.addEventListener('error',e=>notice('Application error: '+e.message));
+loadLocal();if(!state.source){state={...initialState(),...JSON.parse(JSON.stringify(PRELOADED_STATE)),schema:VERSION,orderMeta:{}};saveLocal()}render();showPage('dashboard');if(!rollingInterval)rollingInterval=setInterval(tickRolling,100);
+window.addEventListener('storage',e=>{if(e.key===STORE&&e.newValue){loadLocal();exitPrint();render();rollingStarted=Date.now();notice('Saved workspace changes applied. Reopen print preview for updated sheets.')}});
+</script>
+</body></html>
